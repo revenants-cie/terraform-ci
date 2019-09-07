@@ -15,7 +15,7 @@ help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < Makefile
 
 .PHONY: bootstrap
-bootstrap: install-hooks ## bootstrap the development environment
+bootstrap: ## bootstrap the development environment
 	pip install -U "pip ~= 19.1"
 	pip install -U "setuptools ~= 41.0"
 	pip install -r requirements/requirements.txt \
@@ -56,9 +56,3 @@ clean-test:
 
 clean-docs:
 	rm -rf docs/_build
-
-
-.PHONY: install-hooks
-install-hooks:
-	test -L .git/hooks/pre-commit || ln -fs ../../hooks/pre-commit .git/hooks/pre-commit
-	chmod +x .git/hooks/pre-commit
