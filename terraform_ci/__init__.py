@@ -2,8 +2,9 @@
 import json
 import logging
 from os import environ, path as osp
-from os.path import pardir
 from subprocess import Popen, PIPE
+
+__version__ = '0.1.1'
 
 DEFAULT_TERRAFORM_VARS = '.env/tf_env.json'
 LOG = logging.getLogger(__name__)
@@ -60,6 +61,7 @@ def render_comment(status):
         'change': '![#1589F0](https://placehold.it/15/1589F0/000000?text=+) ',
         'destroy': '![#f03c15](https://placehold.it/15/f03c15/000000?text=+) '
     }
+
     def flag(local_change):
         for k in status.keys():
             if status[k][local_change] > 0:
