@@ -42,7 +42,8 @@ if __name__ == '__main__':
         },
         entry_points={
             'console_scripts': [
-                'install-terraform=support.install_terraform:install_terraform',
+                'install-terraform='
+                'terraform_ci.install_terraform:install_terraform',
                 'terraform-ci=terraform_ci.ci_runner:terraform_ci'
             ]
         },
