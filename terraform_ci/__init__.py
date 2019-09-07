@@ -242,9 +242,18 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
     with open(config_path) as f_descr:
         tf_vars = json.loads(f_descr.read())
 
-    environ['AWS_ACCESS_KEY_ID'] = tf_vars['TF_VAR_aws_access_key']
-    environ['AWS_SECRET_ACCESS_KEY'] = tf_vars['TF_VAR_aws_secret_key']
-    environ['GITHUB_TOKEN'] = tf_vars['TF_VAR_github_token']
+    common_variables = [
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "GITHUB_TOKEN"
+    ]
+    for variable in common_variables:
+        try:
+            environ[variable] = tf_vars['TF_VAR_{var}'.format(
+                var=variable.upper()
+            )]
+        except KeyError:
+            pass
 
     for key, value in tf_vars.items():
         environ[key] = value
