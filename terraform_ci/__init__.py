@@ -4,7 +4,7 @@ import logging
 from os import environ, path as osp
 from subprocess import Popen, PIPE
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 DEFAULT_TERRAFORM_VARS = '.env/tf_env.json'
 LOG = logging.getLogger(__name__)
