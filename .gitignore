@@ -1,0 +1,8 @@
+.idea
+/tf.plan
+/.terraform/
+/.coverage
+__pycache__
+*.egg-info
+/.env/
+/.env.tar

@@ -1,0 +1,18 @@
+dist: xenial
+language: python
+sudo: required
+python:
+    - "3.7"
+
+install:
+    - make bootstrap
+
+script:
+    - make test
+
+#deploy:
+#    provider: pypi
+#    user: twindb
+#    distributions: sdist bdist_wheel
+#    on:
+#        branch: master
