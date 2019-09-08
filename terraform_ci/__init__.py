@@ -4,7 +4,7 @@ import logging
 from os import environ, path as osp
 from subprocess import Popen, PIPE
 
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 
 DEFAULT_TERRAFORM_VARS = '.env/tf_env.json'
 LOG = logging.getLogger(__name__)
@@ -250,7 +250,7 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
     for variable in common_variables:
         try:
             environ[variable] = tf_vars['TF_VAR_{var}'.format(
-                var=variable.upper()
+                var=variable.lower()
             )]
         except KeyError:
             pass
