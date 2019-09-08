@@ -1,13 +1,26 @@
 """Helper functions to run terraform in CI or workstation."""
 import json
 import logging
+import sys
 from os import environ, path as osp
 from subprocess import Popen, PIPE
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 DEFAULT_TERRAFORM_VARS = '.env/tf_env.json'
 LOG = logging.getLogger(__name__)
+
+
+class LessThanFilter(logging.Filter):  # pylint: disable=too-few-public-methods
+    """Filters out log messages of a lower level."""
+
+    def __init__(self, exclusive_maximum, name=""):
+        super(LessThanFilter, self).__init__(name)
+        self.max_level = exclusive_maximum
+
+    def filter(self, record):
+        # non-zero return means we log this message
+        return 1 if record.levelno < self.max_level else 0
 
 
 def render_comment(status):
@@ -242,12 +255,23 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
     with open(config_path) as f_descr:
         tf_vars = json.loads(f_descr.read())
 
-    try:
-        environ["AWS_ACCESS_KEY_ID"] = tf_vars['TF_VAR_aws_access_key']
-        environ["TF_VAR_aws_access_key_id"] = tf_vars['TF_VAR_aws_access_key']
+    var_map = {
+        "TF_VAR_aws_access_key": [
+            "AWS_ACCESS_KEY_ID",
+            "TF_VAR_aws_access_key_id"
+        ],
+        "TF_VAR_aws_secret_key": [
+            "AWS_SECRET_ACCESS_KEY",
+            "TF_VAR_aws_secret_access_key"
+        ]
+    }
+    for key in var_map:
+        try:
+            for eq_key in var_map[key]:
+                environ[eq_key] = tf_vars[key]
 
-    except KeyError:
-        pass
+        except KeyError:
+            pass
 
     common_variables = [
         "AWS_ACCESS_KEY_ID",
@@ -260,8 +284,8 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
                 var=variable.lower()
             )]
 
-        except KeyError:
-            pass
+        except KeyError as err:
+            LOG.debug('Key %s is missing in %s', err, config_path)
 
     for key, value in tf_vars.items():
         environ[key] = value
@@ -293,3 +317,36 @@ def convert_to_newlines(text):
     :rtype: str
     """
     return text.replace(b'\\n', b'\n').decode('UTF-8')
+
+
+def setup_logging(logger, debug=False):  # pragma: no cover
+    """Configures logging for the module"""
+
+    fmt_str = "%(asctime)s: %(levelname)s:" \
+              " %(module)s.%(funcName)s():%(lineno)d: %(message)s"
+
+    console_handler = logging.StreamHandler(stream=sys.stdout)
+    console_handler.addFilter(LessThanFilter(logging.WARNING))
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(logging.Formatter(fmt_str))
+
+    # Log errors and warnings to stderr
+    console_handler_err = logging.StreamHandler(stream=sys.stderr)
+    console_handler_err.setLevel(logging.WARNING)
+    console_handler_err.setFormatter(logging.Formatter(fmt_str))
+
+    # Log debug to stderr
+    console_handler_debug = logging.StreamHandler(stream=sys.stderr)
+    console_handler_debug.addFilter(LessThanFilter(logging.INFO))
+    console_handler_debug.setLevel(logging.DEBUG)
+    console_handler_debug.setFormatter(logging.Formatter(fmt_str))
+
+    logger.handlers = []
+    logger.addHandler(console_handler)
+    logger.addHandler(console_handler_err)
+
+    if debug:
+        logger.addHandler(console_handler_debug)
+        logger.debug_enabled = True
+
+    logger.setLevel(logging.DEBUG)
