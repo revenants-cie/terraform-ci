@@ -19,6 +19,12 @@ LOG = logging.getLogger(__name__)
     show_default=True,
 )
 @click.option(
+    '--module-name',
+    default=None,
+    help='Use this string as module name',
+    show_default=True,
+)
+@click.option(
     '--env-file',
     help='A JSON file with terraform environment variables',
     default=DEFAULT_TERRAFORM_VARS,
@@ -28,7 +34,7 @@ LOG = logging.getLogger(__name__)
     'action',
     type=click.Choice(['plan', 'apply'])
 )
-def terraform_ci(modules_path, env_file, action):
+def terraform_ci(modules_path, module_name, env_file, action):
     """
     Run Terraform action.
 
@@ -55,7 +61,7 @@ def terraform_ci(modules_path, env_file, action):
         LOG.warning("Environment file %s doesn't exit", env_file)
 
     # module name is parent directory
-    mod = module_name_from_path(modules_path)
+    mod = module_name or module_name_from_path(modules_path)
     LOG.info('Processing module %s', mod)
 
     status = {
