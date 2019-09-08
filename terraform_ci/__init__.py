@@ -272,7 +272,7 @@ def module_name_from_path(path):
     if abspath == '/':
         return 'root'
 
-    return abspath.split(sep=osp.sep)[-1]
+    return osp.basename(abspath)
 
 
 def convert_to_newlines(text):
