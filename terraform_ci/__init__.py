@@ -242,6 +242,13 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
     with open(config_path) as f_descr:
         tf_vars = json.loads(f_descr.read())
 
+    try:
+        environ["AWS_ACCESS_KEY_ID"] = tf_vars['TF_VAR_aws_access_key']
+        environ["TF_VAR_aws_access_key_id"] = tf_vars['TF_VAR_aws_access_key']
+
+    except KeyError:
+        pass
+
     common_variables = [
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
@@ -252,6 +259,7 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
             environ[variable] = tf_vars['TF_VAR_{var}'.format(
                 var=variable.lower()
             )]
+
         except KeyError:
             pass
 

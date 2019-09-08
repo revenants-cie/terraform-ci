@@ -37,3 +37,28 @@ def test_setup_environment_empty(tmpdir):
     )
 
     setup_environment(config_path=str(conf))
+
+
+def test_setup_environment_old_aws_key_name(tmpdir):
+    """
+    Treat AWS_ACCESS_KEY_ID and AWS_ACCESS_KEY same way.
+    """
+    conf = tmpdir.join('foo.json')
+    conf.write(
+        """
+        {
+            "TF_VAR_aws_access_key": "foo"
+        }
+        """
+    )
+    # unset variables
+    for variable in ["TF_VAR_aws_access_key_id", "AWS_ACCESS_KEY_ID"]:
+        try:
+            del environ[variable]
+
+        except KeyError:
+            pass
+
+    setup_environment(config_path=str(conf))
+    assert environ["TF_VAR_aws_access_key_id"] == "foo"
+    assert environ["AWS_ACCESS_KEY_ID"] == "foo"
