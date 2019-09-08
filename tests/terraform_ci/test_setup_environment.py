@@ -10,17 +10,20 @@ def test_setup_environment(tmpdir):
     conf.write(
         """
         {
-            "TF_VAR_aws_access_key": "foo",
-            "TF_VAR_aws_secret_key": "bar",
+            "TF_VAR_aws_access_key_id": "foo",
+            "TF_VAR_aws_secret_access_key": "bar",
             "SOME_FOOBAR": "foobar"
         }
         """
     )
 
     setup_environment(config_path=str(conf))
-    assert environ["TF_VAR_aws_access_key"] == "foo"
-    assert environ["TF_VAR_aws_secret_key"] == "bar"
+    assert environ["TF_VAR_aws_access_key_id"] == "foo"
+    assert environ["TF_VAR_aws_secret_access_key"] == "bar"
     assert environ["SOME_FOOBAR"] == "foobar"
+    # make sure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY are also set
+    assert environ["AWS_ACCESS_KEY_ID"] == "foo"
+    assert environ["AWS_SECRET_ACCESS_KEY"] == "bar"
 
 
 def test_setup_environment_empty(tmpdir):

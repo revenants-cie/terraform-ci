@@ -250,7 +250,7 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
     for variable in common_variables:
         try:
             environ[variable] = tf_vars['TF_VAR_{var}'.format(
-                var=variable.upper()
+                var=variable.lower()
             )]
         except KeyError:
             pass
