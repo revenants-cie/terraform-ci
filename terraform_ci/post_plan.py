@@ -6,8 +6,7 @@ import os
 # noinspection PyPackageRequirements
 from requests import HTTPError, post
 
-LOG = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
+from terraform_ci import LOG
 
 
 def post_comment(comment=None):

@@ -5,7 +5,8 @@ from shutil import rmtree
 from subprocess import check_call
 from tempfile import mkdtemp
 
-LOG = logging.getLogger(__name__)
+from terraform_ci import LOG
+
 TERRAFORM_DISTRIBUTION_URL = "https://releases.hashicorp.com/terraform/" \
                              "0.12.5/terraform_0.12.5_linux_amd64.zip"
 BINDIR = '/usr/local/bin/'
@@ -15,7 +16,6 @@ def install_terraform():
     """Download terraform binary from hashicorp website and
     install it in local binary directory.
     """
-    logging.basicConfig(level=logging.INFO)
     tmpdir = mkdtemp()
 
     try:

@@ -1,17 +1,21 @@
 """Module runs a job in Travis-CI."""
-import logging
 import sys
 from os import environ, path as osp, EX_SOFTWARE
 import click
 
 from terraform_ci import DEFAULT_TERRAFORM_VARS, setup_environment, run_job, \
-    render_comment, module_name_from_path, convert_to_newlines
+    render_comment, module_name_from_path, convert_to_newlines, setup_logging, \
+    LOG
 from terraform_ci.post_plan import post_comment
-
-LOG = logging.getLogger(__name__)
 
 
 @click.command()
+@click.option(
+    '--debug',
+    help='Print debug messages',
+    is_flag=True,
+    default=False
+)
 @click.option(
     '--modules-path',
     default='./',
@@ -34,7 +38,7 @@ LOG = logging.getLogger(__name__)
     'action',
     type=click.Choice(['plan', 'apply'])
 )
-def terraform_ci(modules_path, module_name, env_file, action):
+def terraform_ci(debug, modules_path, module_name, env_file, action):
     """
     Run Terraform action.
 
@@ -46,7 +50,7 @@ def terraform_ci(modules_path, module_name, env_file, action):
     ci-runner can be called in a CI environment or locally on
     a workstation.
     """
-    logging.basicConfig(level=logging.DEBUG)
+    setup_logging(LOG, debug=debug)
 
     try:
         pull_request = not environ['TRAVIS_PULL_REQUEST'] == "false"
