@@ -4,7 +4,7 @@ import logging
 from os import environ, path as osp
 from subprocess import Popen, PIPE
 
-__version__ = '0.1.5'
+__version__ = '0.2.0'
 
 DEFAULT_TERRAFORM_VARS = '.env/tf_env.json'
 LOG = logging.getLogger(__name__)
@@ -272,7 +272,7 @@ def module_name_from_path(path):
     if abspath == '/':
         return 'root'
 
-    return abspath.split(sep=osp.sep)[-1]
+    return osp.basename(abspath)
 
 
 def convert_to_newlines(text):
