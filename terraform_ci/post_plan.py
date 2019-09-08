@@ -1,6 +1,5 @@
 """Module for publishing comments to GitHub"""
 import json
-import logging
 import os
 
 # noinspection PyPackageRequirements

@@ -1,5 +1,4 @@
 """Module prepares terraform binary"""
-import logging
 from os import path as osp
 from shutil import rmtree
 from subprocess import check_call
