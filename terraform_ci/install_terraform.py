@@ -6,8 +6,13 @@ from tempfile import mkdtemp
 
 from terraform_ci import LOG
 
-TERRAFORM_DISTRIBUTION_URL = "https://releases.hashicorp.com/terraform/" \
-                             "0.12.5/terraform_0.12.5_linux_amd64.zip"
+TERRAFORM_VERSION = "0.12.7"
+
+TERRAFORM_DISTRIBUTION_URL = "https://releases.hashicorp.com/" \
+                             "terraform/{version}/terraform_{version}" \
+                             "_linux_amd64.zip"\
+    .format(version=TERRAFORM_VERSION)
+
 BINDIR = '/usr/local/bin/'
 
 
