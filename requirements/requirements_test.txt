@@ -2,3 +2,4 @@ mock ~= 3.0
 pylint ~= 2.3
 pytest ~= 4.5
 pytest-cov ~= 2.7
+tox ~= 3.14
