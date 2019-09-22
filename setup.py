@@ -25,7 +25,7 @@ SETUP_REQUIREMENTS = parse_requirements('requirements/requirements_setup.txt')
 if __name__ == '__main__':
     setup(
         name='terraform-ci',
-        version='0.3.0',
+        version='0.3.1',
         description="Terraform CI runs terraform in Travis-CI",
         long_description=dedent(
             """
@@ -59,8 +59,8 @@ if __name__ == '__main__':
             'Natural Language :: English',
             'Operating System :: POSIX :: Linux',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.6'
-            'Programming Language :: Python :: 3.7'
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
         ],
         setup_requires=SETUP_REQUIREMENTS,
         test_suite='tests',
