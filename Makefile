@@ -28,8 +28,12 @@ install: ## install the package
 	python setup.py install
 
 .PHONY: test
-test: ## run tests
+test: ## run unit tests
 	python setup.py test
+
+.PHONY: test-all
+test-all: ## run unit tests on all supported python versions
+	tox
 
 clean: clean-build clean-pyc clean-test clean-docs ## remove all build, test, coverage and Python artifacts
 

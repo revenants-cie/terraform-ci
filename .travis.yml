@@ -2,7 +2,12 @@ dist: xenial
 language: python
 sudo: required
 python:
+- '3.6'
 - '3.7'
+matrix:
+    include:
+    - python: '3.6'
+    - python: '3.7'
 install:
 - make bootstrap
 script:
@@ -13,5 +18,6 @@ deploy:
   distributions: sdist bdist_wheel
   on:
     branch: master
+    python: '3.7'
   password:
     secure: EQfYMuzXC2qDjc1G4KD3bq8S/ieFujBRUaaxAcigeQ/t/4tkFRIXK+ElE3RAGTgtM8pdb8L/mWB3r8bRMDkA3JCTJIbxxOOzaZntm+JUMhVH+h2Ud667LGNFLA/HITnMXk9j2+vB0+IRSAV1SJdFCReJo/wecM+lqDjv2NWDfaycJ+iqyKt+Fg0F36TMgwvQJsuQ0XMivNaf0Cx4AWvfh7r/5GeJG+Lpb+nA9ogkjRUhBcyDkVRd2EjO2fkbK/CUR5JBOwc6rMmB/GYe6j2j8aXbDqxxO34W0hH/3oQSjpXv3zHXwBNkJLG/l1VYd6uxto620x13pICUnZ/v0F8v6/UazSKFXqptGAnrOtRmaJuOmGrp1VTDKeXMI81llfS9YbYysYOmgJ2J6szhtoGD+6d8/DY/YyJsV9t4OQSSM60UN/dC5BW0v1HOIpqLnqBoIxLqQiCM7A+E1zWjvZY3/Uo3WZGvz0gDkIyb+wmZ2tBftaVANwKQJPBSNSvcyBlwAL3Xvaw1QrWihva5jLI8Sjz+QVYD1qgVkW704z1qH3pj24RJQ4dO2t9KLF0s8ZdPSGOY5u4R67Hbkb5swxU1QS02OVhRTwgDYrVPQxQ8UppIm4JR/o+t5UaAAmcv9w20geHM1ByRdfbgrM5kl9lE+aT05yi/MpINnU2kRplxdao=
