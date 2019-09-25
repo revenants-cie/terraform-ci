@@ -36,7 +36,7 @@ from terraform_ci.post_plan import post_comment
 )
 @click.argument(
     'action',
-    type=click.Choice(['plan', 'apply'])
+    type=click.Choice(['plan', 'apply', 'destroy'])
 )
 def terraform_ci(debug, modules_path, module_name, env_file, action):
     """
@@ -83,7 +83,7 @@ def terraform_ci(debug, modules_path, module_name, env_file, action):
             mod,
             status[mod]['stderr'].decode('utf-8')
         )
-        exit(EX_SOFTWARE)
+        sys.exit(EX_SOFTWARE)
 
     if pull_request:
         post_comment(

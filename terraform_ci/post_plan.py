@@ -3,6 +3,8 @@ import json
 import os
 
 # noinspection PyPackageRequirements
+import sys
+
 from requests import HTTPError, post
 
 from terraform_ci import LOG
@@ -60,12 +62,12 @@ def post_comment(comment=None):
     except KeyError as err:
         LOG.error('Cannot post a comment: %s', content)
         LOG.error("Environment variable %s isn't defined", err)
-        exit(1)
+        sys.exit(1)
 
     except HTTPError as err:
         LOG.error(err)
         LOG.error(err.response.content)
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
