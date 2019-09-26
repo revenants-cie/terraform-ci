@@ -10,6 +10,7 @@ from terraform_ci.post_plan import post_comment
 
 
 @click.command()
+@click.version_option()
 @click.option(
     '--debug',
     help='Print debug messages',

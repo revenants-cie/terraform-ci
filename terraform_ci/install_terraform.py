@@ -18,6 +18,7 @@ DEFAULT_BINDIR = '/usr/local/bin'
 
 
 @click.command()
+@click.version_option()
 @click.option(
     '--debug',
     help='Show debug messages',
