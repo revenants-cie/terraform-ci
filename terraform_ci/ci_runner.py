@@ -79,11 +79,9 @@ def terraform_ci(debug, modules_path, module_name, env_file, action):
     if status[mod]['success']:
         LOG.info('%s success: %s', mod, status[mod]['success'])
     else:
-        LOG.error(
-            'Failed to process %s: %s',
-            mod,
-            status[mod]['stderr'].decode('utf-8')
-        )
+        LOG.error('Failed to process %s', mod)
+        LOG.error("STDOUT: %s", status[mod]['stdout'].decode('utf-8'))
+        LOG.error("STDERR: %s", status[mod]['stderr'].decode('utf-8'))
         sys.exit(EX_SOFTWARE)
 
     if pull_request:
