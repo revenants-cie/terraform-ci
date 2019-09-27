@@ -5,7 +5,7 @@ import sys
 from os import environ, path as osp
 from subprocess import Popen, PIPE
 
-__version__ = '0.6.1'
+__version__ = '0.6.2'
 
 DEFAULT_TERRAFORM_VARS = '.env/tf_env.json'
 LOG = logging.getLogger(__name__)
@@ -69,16 +69,22 @@ def render_comment(status):
     :return: Markdown formatted comment
     :rtype: str
     """
+    print(status)
+    # 1/0
     map_change = {
         'add': '![#c5f015](https://placehold.it/15/c5f015/000000?text=+) ',
         'change': '![#1589F0](https://placehold.it/15/1589F0/000000?text=+) ',
-        'destroy': '![#f03c15](https://placehold.it/15/f03c15/000000?text=+) '
+        'destroy': '![#f03c15](https://placehold.it/15/f03c15/000000?text=+) ',
+        None: '![#FFFF00](https://placehold.it/15/FFFF00/000000?text=+) '
     }
 
     def flag(local_change):
         for k in status.keys():
-            if status[k][local_change] > 0:
-                return map_change[local_change]
+            try:
+                if status[k][local_change] > 0:
+                    return map_change[local_change]
+            except TypeError:
+                return map_change[None]
 
         return ''
 
@@ -100,10 +106,13 @@ def render_comment(status):
     for key in status.keys():
         changes = {}
         for change in ['add', 'change', 'destroy']:
-            if status[key][change] > 0:
-                changes[change] = '**%d**' % status[key][change]
-            else:
-                changes[change] = status[key][change]
+            try:
+                if status[key][change] > 0:
+                    changes[change] = '**%d**' % status[key][change]
+                else:
+                    changes[change] = status[key][change]
+            except TypeError:
+                changes[change] = 'Unknown'
 
         line = "**{module}** | {tag} `{success}` " \
                "| {add} | {change} | {destroy}"

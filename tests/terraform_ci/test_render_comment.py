@@ -125,6 +125,33 @@ actions need to be performed.
 
 _no output_
 """
+    ),
+    (
+        {
+            'cloudflare': {
+                'success': True,
+                'stderr': b'',
+                'stdout': b'foo',
+                'add': None,
+                'change': None,
+                'destroy': None
+            }
+        },
+        """Module | Success | ![#FFFF00](https://placehold.it/15/FFFF00/000000?text=+) Add | ![#FFFF00](https://placehold.it/15/FFFF00/000000?text=+) Change | ![#FFFF00](https://placehold.it/15/FFFF00/000000?text=+) Destroy
+--- | --- | ---: | ---: | ---:
+**cloudflare** | ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `True` | Unknown | Unknown | Unknown
+
+# **cloudflare**
+
+## stdout
+
+```foo```
+
+## stderr
+
+_no output_
+"""
+
     )
 ])
 def test_render_comment(status, expected_output):
