@@ -1,2 +1,3 @@
+boto3 ~= 1.10
 Click ~= 7.0
 requests ~= 2.22

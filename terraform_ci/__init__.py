@@ -4,8 +4,11 @@ import logging
 import sys
 from os import environ, path as osp
 from subprocess import Popen, PIPE
+from urllib.parse import urlparse
 
-__version__ = '0.6.2'
+import boto3
+
+__version__ = '0.7.0'
 
 DEFAULT_TERRAFORM_VARS = '.env/tf_env.json'
 LOG = logging.getLogger(__name__)
@@ -256,6 +259,38 @@ def execute(cmd):
     return proc.returncode, cout, cerr
 
 
+def read_from_secretsmanager(url):
+    """
+    Read a secret from AWS secrets manager.
+
+    ``url`` is where the secret value is stored and has format:
+
+        secretsmanager://<secret name>:<json key>
+
+    "secret name" is the secret identifier as AWS calls it in Secrets Manager.
+    It is assumed the secret stores a JSON string. The function returns
+    value of the "json key".
+
+    :param url: URL to a secret value.
+    :type url: str
+    :return: Secret value that is stored in a JSON key "json key".
+    :rtype: str
+    """
+    client = boto3.client('secretsmanager')
+    location = urlparse(url)
+    full_path = location.netloc + location.path
+    aws_response = client.get_secret_value(
+        SecretId=full_path.split(':')[0]
+    )
+    try:
+        return json.loads(
+            aws_response['SecretString']
+        )[full_path.split(':')[1]]
+
+    except json.JSONDecodeError:
+        return aws_response['SecretString']
+
+
 def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
     """
     Read AWS variables from Terraform config and set them
@@ -297,7 +332,10 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
             LOG.debug('Key %s is missing in %s', err, config_path)
 
     for key, value in tf_vars.items():
-        environ[key] = value
+        if value.startswith('secretsmanager://'):
+            environ[key] = read_from_secretsmanager(value)
+        else:
+            environ[key] = value
 
 
 def module_name_from_path(path):
