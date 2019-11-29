@@ -317,6 +317,12 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
         except KeyError:
             pass
 
+    for key, value in tf_vars.items():
+        if value.startswith('secretsmanager://'):
+            environ[key] = read_from_secretsmanager(value)
+        else:
+            environ[key] = value
+
     common_variables = [
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
@@ -324,18 +330,12 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
     ]
     for variable in common_variables:
         try:
-            environ[variable] = tf_vars['TF_VAR_{var}'.format(
+            environ[variable] = environ['TF_VAR_{var}'.format(
                 var=variable.lower()
             )]
 
         except KeyError as err:
             LOG.debug('Key %s is missing in %s', err, config_path)
-
-    for key, value in tf_vars.items():
-        if value.startswith('secretsmanager://'):
-            environ[key] = read_from_secretsmanager(value)
-        else:
-            environ[key] = value
 
 
 def module_name_from_path(path):
