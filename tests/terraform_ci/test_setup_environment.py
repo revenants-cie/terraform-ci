@@ -1,6 +1,8 @@
 """Tests for setup_environment()"""
 from os import environ
 
+import mock
+
 from terraform_ci import setup_environment
 
 
@@ -87,3 +89,32 @@ def test_setup_environment_old_aws_secret_key(tmpdir):
     setup_environment(config_path=str(conf))
     assert environ["TF_VAR_aws_secret_access_key"] == "foo"
     assert environ["AWS_SECRET_ACCESS_KEY"] == "foo"
+
+
+@mock.patch('terraform_ci.read_from_secretsmanager')
+def test_setup_environment_from_secretsmanager(
+        mock_read_from_secretsmanager, tmpdir):
+    """
+    The method reads a secret key from secretsmanager
+    """
+    conf = tmpdir.join('foo.json')
+    conf.write(
+        """
+        {
+            "TF_VAR_fookey": "secretsmanager:///path/to/secret:key"
+        }
+        """
+    )
+    # unset variables
+    for variable in ["TF_VAR_fookey"]:
+        try:
+            del environ[variable]
+
+        except KeyError:
+            pass
+    mock_read_from_secretsmanager.return_value = 'foo_value'
+    setup_environment(config_path=str(conf))
+    mock_read_from_secretsmanager.assert_called_once_with(
+        'secretsmanager:///path/to/secret:key'
+    )
+    assert environ["TF_VAR_fookey"] == "foo_value"
