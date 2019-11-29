@@ -118,3 +118,32 @@ def test_setup_environment_from_secretsmanager(
         'secretsmanager:///path/to/secret:key'
     )
     assert environ["TF_VAR_fookey"] == "foo_value"
+
+
+@mock.patch('terraform_ci.read_from_secretsmanager')
+def test_setup_environment_from_secretsmanager_github(
+        mock_read_from_secretsmanager, tmpdir):
+    """
+    The method reads a secret key from secretsmanager and sets GITHUB_TOKEN
+    """
+    conf = tmpdir.join('foo.json')
+    conf.write(
+        """
+        {
+            "TF_VAR_github_token": "secretsmanager:///path/to/secret:key"
+        }
+        """
+    )
+    # unset variables
+    for variable in ["TF_VAR_github_token"]:
+        try:
+            del environ[variable]
+
+        except KeyError:
+            pass
+    mock_read_from_secretsmanager.return_value = 'foo_value'
+    setup_environment(config_path=str(conf))
+    mock_read_from_secretsmanager.assert_called_once_with(
+        'secretsmanager:///path/to/secret:key'
+    )
+    assert environ["GITHUB_TOKEN"] == "foo_value"
