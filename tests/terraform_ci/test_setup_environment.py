@@ -18,6 +18,8 @@ def test_setup_environment(tmpdir):
         }
         """
     )
+    del environ["AWS_ACCESS_KEY_ID"]
+    del environ["AWS_SECRET_ACCESS_KEY"]
 
     setup_environment(config_path=str(conf))
     assert environ["TF_VAR_aws_access_key_id"] == "foo"

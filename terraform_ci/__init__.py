@@ -319,7 +319,7 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
 
     for variable in ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]:
         try:
-            environ[variable] = environ['TF_VAR_{var}'.format(
+            environ[variable] = tf_vars['TF_VAR_{var}'.format(
                 var=variable.lower()
             )]
 
