@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import boto3
 
-__version__ = '0.7.1'
+__version__ = '0.7.2'
 
 DEFAULT_TERRAFORM_VARS = '.env/tf_env.json'
 LOG = logging.getLogger(__name__)
@@ -317,18 +317,22 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
         except KeyError:
             pass
 
+    for variable in ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]:
+        try:
+            environ[variable] = tf_vars['TF_VAR_{var}'.format(
+                var=variable.lower()
+            )]
+
+        except KeyError as err:
+            LOG.debug('Key %s is missing in %s', err, config_path)
+
     for key, value in tf_vars.items():
         if value.startswith('secretsmanager://'):
             environ[key] = read_from_secretsmanager(value)
         else:
             environ[key] = value
 
-    common_variables = [
-        "AWS_ACCESS_KEY_ID",
-        "AWS_SECRET_ACCESS_KEY",
-        "GITHUB_TOKEN"
-    ]
-    for variable in common_variables:
+    for variable in ["GITHUB_TOKEN"]:
         try:
             environ[variable] = environ['TF_VAR_{var}'.format(
                 var=variable.lower()
