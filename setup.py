@@ -65,5 +65,5 @@ if __name__ == '__main__':
         setup_requires=SETUP_REQUIREMENTS,
         test_suite='tests',
         tests_require=TEST_REQUIREMENTS,
-        python_require='>=3.6'
+        python_requires='>=3.6'
     )
