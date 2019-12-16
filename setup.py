@@ -40,7 +40,7 @@ if __name__ == "__main__":
         package_dir={"terraform_ci": "terraform_ci"},
         entry_points={
             "console_scripts": [
-                "install-terraform=" "terraform_ci.install_terraform:main",
+                "install-terraform=terraform_ci.install_terraform:main",
                 "terraform-ci=terraform_ci.ci_runner:terraform_ci",
             ]
         },
