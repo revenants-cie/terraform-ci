@@ -29,6 +29,7 @@ install: ## install the package
 
 .PHONY: test
 test: ## run unit tests
+	black --check terraform_ci
 	python setup.py test
 
 .PHONY: test-all

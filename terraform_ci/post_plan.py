@@ -24,43 +24,40 @@ def post_comment(comment=None):
     """
     if comment is None:
         try:
-            content = os.environ['COMMENT_CONTENT']
+            content = os.environ["COMMENT_CONTENT"]
 
         except KeyError:
-            content = 'Empty comment'
+            content = "Empty comment"
     else:
         content = comment
 
     try:
-        pull_request = os.environ['TRAVIS_PULL_REQUEST']
-        if pull_request != 'false':
-            url = "https://api.github.com/repos/" \
-                  "{TRAVIS_REPO_SLUG}/issues/{TRAVIS_PULL_REQUEST}/comments"\
-                .format(
-                    TRAVIS_REPO_SLUG=os.environ['TRAVIS_REPO_SLUG'],
-                    TRAVIS_PULL_REQUEST=pull_request
+        pull_request = os.environ["TRAVIS_PULL_REQUEST"]
+        if pull_request != "false":
+            url = (
+                "https://api.github.com/repos/"
+                "{TRAVIS_REPO_SLUG}/issues/{TRAVIS_PULL_REQUEST}/comments".format(
+                    TRAVIS_REPO_SLUG=os.environ["TRAVIS_REPO_SLUG"],
+                    TRAVIS_PULL_REQUEST=pull_request,
                 )
+            )
 
             response = post(
                 url,
-                data=json.dumps(
-                    {
-                        'body': content
-                    }
-                ),
+                data=json.dumps({"body": content}),
                 headers={
-                    'Authorization': 'token {github_token}'.format(
-                        github_token=os.environ['GITHUB_TOKEN']
+                    "Authorization": "token {github_token}".format(
+                        github_token=os.environ["GITHUB_TOKEN"]
                     )
-                }
+                },
             )
             response.raise_for_status()
-            LOG.info('Successfully posted a comment.')
+            LOG.info("Successfully posted a comment.")
         else:
-            LOG.info('Not a pull request - not posting a comment.')
+            LOG.info("Not a pull request - not posting a comment.")
 
     except KeyError as err:
-        LOG.error('Cannot post a comment: %s', content)
+        LOG.error("Cannot post a comment: %s", content)
         LOG.error("Environment variable %s isn't defined", err)
         sys.exit(1)
 
@@ -70,5 +67,5 @@ def post_comment(comment=None):
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     post_comment()

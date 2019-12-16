@@ -2,15 +2,16 @@
 import json
 import logging
 import sys
+from contextlib import contextmanager
 from os import environ, path as osp
 from subprocess import Popen, PIPE
 from urllib.parse import urlparse
 
 import boto3
 
-__version__ = '0.7.2'
+__version__ = "0.8.1"
 
-DEFAULT_TERRAFORM_VARS = '.env/tf_env.json'
+DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 LOG = logging.getLogger(__name__)
 
 
@@ -75,10 +76,10 @@ def render_comment(status):
     print(status)
     # 1/0
     map_change = {
-        'add': '![#c5f015](https://placehold.it/15/c5f015/000000?text=+) ',
-        'change': '![#1589F0](https://placehold.it/15/1589F0/000000?text=+) ',
-        'destroy': '![#f03c15](https://placehold.it/15/f03c15/000000?text=+) ',
-        None: '![#FFFF00](https://placehold.it/15/FFFF00/000000?text=+) '
+        "add": "![#c5f015](https://placehold.it/15/c5f015/000000?text=+) ",
+        "change": "![#1589F0](https://placehold.it/15/1589F0/000000?text=+) ",
+        "destroy": "![#f03c15](https://placehold.it/15/f03c15/000000?text=+) ",
+        None: "![#FFFF00](https://placehold.it/15/FFFF00/000000?text=+) ",
     }
 
     def flag(local_change):
@@ -89,50 +90,49 @@ def render_comment(status):
             except TypeError:
                 return map_change[None]
 
-        return ''
+        return ""
 
     comment = " | ".join(
         [
-            'Module',
-            'Success',
-            flag('add') + 'Add',
-            flag('change') + 'Change',
-            flag('destroy') + 'Destroy'
+            "Module",
+            "Success",
+            flag("add") + "Add",
+            flag("change") + "Change",
+            flag("destroy") + "Destroy",
         ]
     )
-    comment += '\n' + "--- | --- | ---: | ---: | ---:" + '\n'
+    comment += "\n" + "--- | --- | ---: | ---: | ---:" + "\n"
 
     tag_map = {
-        True: '![#c5f015](https://placehold.it/15/c5f015/000000?text=+)',
-        False: '![#f03c15](https://placehold.it/15/f03c15/000000?text=+)'
+        True: "![#c5f015](https://placehold.it/15/c5f015/000000?text=+)",
+        False: "![#f03c15](https://placehold.it/15/f03c15/000000?text=+)",
     }
     for key in status.keys():
         changes = {}
-        for change in ['add', 'change', 'destroy']:
+        for change in ["add", "change", "destroy"]:
             try:
                 if status[key][change] > 0:
-                    changes[change] = '**%d**' % status[key][change]
+                    changes[change] = "**%d**" % status[key][change]
                 else:
                     changes[change] = status[key][change]
             except TypeError:
-                changes[change] = 'Unknown'
+                changes[change] = "Unknown"
 
-        line = "**{module}** | {tag} `{success}` " \
-               "| {add} | {change} | {destroy}"
+        line = "**{module}** | {tag} `{success}` " "| {add} | {change} | {destroy}"
         line = line.format(
             module=key,
-            tag=tag_map[status[key]['success']],
-            success=status[key]['success'],
-            add=changes['add'],
-            change=changes['change'],
-            destroy=changes['destroy']
+            tag=tag_map[status[key]["success"]],
+            success=status[key]["success"],
+            add=changes["add"],
+            change=changes["change"],
+            destroy=changes["destroy"],
         )
-        comment += line + '\n'
+        comment += line + "\n"
     for key in status.keys():
         outs = {}
-        for out in ['stdout', 'stderr']:
+        for out in ["stdout", "stderr"]:
             if isinstance(status[key][out], bytes):
-                outs[out] = status[key][out].decode('utf-8')
+                outs[out] = status[key][out].decode("utf-8")
             else:
                 outs[out] = status[key][out]
 
@@ -146,12 +146,12 @@ def render_comment(status):
 ## stderr
 
 {cerr}
-""".format(module=key,
-           cout='```' + outs['stdout'] + '```'
-           if outs['stdout'] else '_no output_',
-           cerr='```' + outs['stderr'] + '```'
-           if outs['stderr'] else '_no output_',
-           )
+"""
+        line = line.format(
+            module=key,
+            cout="```" + outs["stdout"] + "```" if outs["stdout"] else "_no output_",
+            cerr="```" + outs["stderr"] + "```" if outs["stderr"] else "_no output_",
+        )
         comment += line
 
     return comment
@@ -172,9 +172,9 @@ def get_action(branch=None, pull_request=False):
     :rtype: str
     """
     if branch == "master" and not pull_request:
-        return 'apply'
+        return "apply"
 
-    return 'plan'
+    return "plan"
 
 
 def parse_plan(output):
@@ -191,7 +191,7 @@ def parse_plan(output):
     destroy = None
     try:
         for line in output.splitlines():
-            if line.startswith('Plan: '):
+            if line.startswith("Plan: "):
                 split_line = line.split()
                 # Plan: 4 to add, 11 to change, 7 to destroy.
                 add = int(split_line[1])
@@ -224,37 +224,33 @@ def run_job(path, action):
         }
     :rtype: dict
     """
-    returncode, cout, cerr = execute(
-        [
-            'make',
-            '-C', path,
-            action
-        ]
-    )
-    status = {
-        'success': returncode == 0,
-        'stderr': cerr,
-        'stdout': cout
-    }
-    parse_tree = parse_plan(cout.decode('utf-8'))
-    status['add'] = parse_tree[0]
-    status['change'] = parse_tree[1]
-    status['destroy'] = parse_tree[2]
+    returncode, cout, cerr = execute(["make", "-C", path, action])
+    status = {"success": returncode == 0, "stderr": cerr, "stdout": cout}
+    parse_tree = parse_plan(cout.decode("utf-8"))
+    status["add"] = parse_tree[0]
+    status["change"] = parse_tree[1]
+    status["destroy"] = parse_tree[2]
 
     return status
 
 
-def execute(cmd):
+def execute(cmd, stdout=PIPE, stderr=PIPE, cwd=None):
     """
     Execute a command and return a tuple with return code, STDOUT and STDERR.
 
     :param cmd: Command.
     :type cmd: list
+    :param stdout: Where to send stdout. Default PIPE.
+    :type stdout: int, None
+    :param stderr: Where to send stdout. Default PIPE.
+    :type stderr: int, None
+    :param cwd: Working directory.
+    :type cwd: str
     :return: Tuple (return code, STDOUT, STDERR)
     :rtype: tuple
     """
-    LOG.info('Executing: %s', ' '.join(cmd))
-    proc = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    LOG.info("Executing: %s", " ".join(cmd))
+    proc = Popen(cmd, stdout=stdout, stderr=stderr, cwd=cwd)
     cout, cerr = proc.communicate()
     return proc.returncode, cout, cerr
 
@@ -276,19 +272,15 @@ def read_from_secretsmanager(url):
     :return: Secret value that is stored in a JSON key "json key".
     :rtype: str
     """
-    client = boto3.client('secretsmanager')
+    client = boto3.client("secretsmanager")
     location = urlparse(url)
     full_path = location.netloc + location.path
-    aws_response = client.get_secret_value(
-        SecretId=full_path.split(':')[0]
-    )
+    aws_response = client.get_secret_value(SecretId=full_path.split(":")[0])
     try:
-        return json.loads(
-            aws_response['SecretString']
-        )[full_path.split(':')[1]]
+        return json.loads(aws_response["SecretString"])[full_path.split(":")[1]]
 
     except json.JSONDecodeError:
-        return aws_response['SecretString']
+        return aws_response["SecretString"]
 
 
 def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
@@ -300,14 +292,11 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
         tf_vars = json.loads(f_descr.read())
 
     var_map = {
-        "TF_VAR_aws_access_key": [
-            "AWS_ACCESS_KEY_ID",
-            "TF_VAR_aws_access_key_id"
-        ],
+        "TF_VAR_aws_access_key": ["AWS_ACCESS_KEY_ID", "TF_VAR_aws_access_key_id"],
         "TF_VAR_aws_secret_key": [
             "AWS_SECRET_ACCESS_KEY",
-            "TF_VAR_aws_secret_access_key"
-        ]
+            "TF_VAR_aws_secret_access_key",
+        ],
     }
     for key in var_map:
         try:
@@ -319,27 +308,23 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
 
     for variable in ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]:
         try:
-            environ[variable] = tf_vars['TF_VAR_{var}'.format(
-                var=variable.lower()
-            )]
+            environ[variable] = tf_vars["TF_VAR_{var}".format(var=variable.lower())]
 
         except KeyError as err:
-            LOG.debug('Key %s is missing in %s', err, config_path)
+            LOG.debug("Key %s is missing in %s", err, config_path)
 
     for key, value in tf_vars.items():
-        if value.startswith('secretsmanager://'):
+        if value.startswith("secretsmanager://"):
             environ[key] = read_from_secretsmanager(value)
         else:
             environ[key] = value
 
     for variable in ["GITHUB_TOKEN"]:
         try:
-            environ[variable] = environ['TF_VAR_{var}'.format(
-                var=variable.lower()
-            )]
+            environ[variable] = environ["TF_VAR_{var}".format(var=variable.lower())]
 
         except KeyError as err:
-            LOG.debug('Key %s is missing in %s', err, config_path)
+            LOG.debug("Key %s is missing in %s", err, config_path)
 
 
 def module_name_from_path(path):
@@ -352,8 +337,8 @@ def module_name_from_path(path):
     """
     abspath = osp.abspath(path)
 
-    if abspath == '/':
-        return 'root'
+    if abspath == "/":
+        return "root"
 
     return osp.basename(abspath)
 
@@ -367,14 +352,16 @@ def convert_to_newlines(text):
     :return: Text where \n are replaced with actual new lines.
     :rtype: str
     """
-    return text.replace(b'\\n', b'\n').decode('UTF-8')
+    return text.replace(b"\\n", b"\n").decode("UTF-8")
 
 
 def setup_logging(logger, debug=False):  # pragma: no cover
     """Configures logging for the module"""
 
-    fmt_str = "%(asctime)s: %(levelname)s:" \
-              " %(module)s.%(funcName)s():%(lineno)d: %(message)s"
+    fmt_str = (
+        "%(asctime)s: %(levelname)s:"
+        " %(module)s.%(funcName)s():%(lineno)d: %(message)s"
+    )
 
     console_handler = logging.StreamHandler(stream=sys.stdout)
     console_handler.addFilter(LessThanFilter(logging.WARNING))
@@ -401,3 +388,37 @@ def setup_logging(logger, debug=False):  # pragma: no cover
         logger.debug_enabled = True
 
     logger.setLevel(logging.DEBUG)
+
+
+@contextmanager
+def terraform_apply(path, destroy_after=True):
+    """
+    Run terraform init and apply, then return a generator.
+    If destroy_after is True, run terraform destroy afterwards.
+
+    :param path: Path to directory with terraform module.
+    :type path: str
+    :param destroy_after: Run terraform destroy after context it returned back.
+    :type destroy_after: bool
+    :return: Nothing. The function just yields to use it in the `with`
+        block.
+    """
+    cmds = [
+        "terraform init -no-color",
+        "terraform get -update=true -no-color",
+        (
+            "terraform apply -var-file=configuration.tfvars -input=false "
+            "-auto-approve"
+        ),
+    ]
+    for cmd in cmds:
+        execute(cmd.split(), stdout=None, stderr=None, cwd=path)
+    yield
+    if destroy_after:
+        execute(
+            "terraform destroy -var-file=configuration.tfvars "
+            "-input=false -auto-approve".split(),
+            stdout=None,
+            stderr=None,
+            cwd=path,
+        )
