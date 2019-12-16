@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 import boto3
 
-__version__ = "0.7.2"
+__version__ = "0.8.0"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 LOG = logging.getLogger(__name__)
