@@ -14,18 +14,18 @@ def parse_requirements(req_file):
     :rtype: dict
     """
     with open(req_file) as fdescr:
-        reqs = fdescr.read().strip().split('\n')
-    return [x for x in reqs if x and not x.strip().startswith('#')]
+        reqs = fdescr.read().strip().split("\n")
+    return [x for x in reqs if x and not x.strip().startswith("#")]
 
 
-REQUIREMENTS = parse_requirements('requirements/requirements.txt')
-TEST_REQUIREMENTS = parse_requirements('requirements/requirements_test.txt')
-SETUP_REQUIREMENTS = parse_requirements('requirements/requirements_setup.txt')
+REQUIREMENTS = parse_requirements("requirements/requirements.txt")
+TEST_REQUIREMENTS = parse_requirements("requirements/requirements_test.txt")
+SETUP_REQUIREMENTS = parse_requirements("requirements/requirements_setup.txt")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     setup(
-        name='terraform-ci',
-        version='version="0.8.0"',
+        name="terraform-ci",
+        version="0.8.0",
         description="Terraform CI runs terraform in Travis-CI",
         long_description=dedent(
             """
@@ -34,17 +34,14 @@ if __name__ == '__main__':
             """
         ),
         author="TwinDB",
-        author_email='dev@twindb.com',
-        url='https://github.com/twindb/terraform-ci',
-        packages=find_packages(exclude=('tests*',)),
-        package_dir={
-            'terraform_ci': 'terraform_ci'
-        },
+        author_email="dev@twindb.com",
+        url="https://github.com/twindb/terraform-ci",
+        packages=find_packages(exclude=("tests*",)),
+        package_dir={"terraform_ci": "terraform_ci"},
         entry_points={
-            'console_scripts': [
-                'install-terraform='
-                'terraform_ci.install_terraform:main',
-                'terraform-ci=terraform_ci.ci_runner:terraform_ci'
+            "console_scripts": [
+                "install-terraform=" "terraform_ci.install_terraform:main",
+                "terraform-ci=terraform_ci.ci_runner:terraform_ci",
             ]
         },
         include_package_data=True,
@@ -52,18 +49,18 @@ if __name__ == '__main__':
         license="Apache Software License 2.0",
         zip_safe=False,
         classifiers=[
-            'Development Status :: 5 - Production/Stable',
-            'Environment :: Console',
-            'Intended Audience :: Developers',
-            'License :: OSI Approved :: Apache Software License',
-            'Natural Language :: English',
-            'Operating System :: POSIX :: Linux',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.6',
-            'Programming Language :: Python :: 3.7',
+            "Development Status :: 5 - Production/Stable",
+            "Environment :: Console",
+            "Intended Audience :: Developers",
+            "License :: OSI Approved :: Apache Software License",
+            "Natural Language :: English",
+            "Operating System :: POSIX :: Linux",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.7",
         ],
         setup_requires=SETUP_REQUIREMENTS,
-        test_suite='tests',
+        test_suite="tests",
         tests_require=TEST_REQUIREMENTS,
-        python_requires='>=3.6'
+        python_requires=">=3.6",
     )
