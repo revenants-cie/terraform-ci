@@ -4,12 +4,12 @@ import logging
 import sys
 from contextlib import contextmanager
 from os import environ, path as osp
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, CalledProcessError
 from urllib.parse import urlparse
 
 import boto3
 
-__version__ = "0.8.2"
+__version__ = "0.8.3"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 LOG = logging.getLogger(__name__)
@@ -400,8 +400,10 @@ def terraform_apply(path, destroy_after=True):
     :type path: str
     :param destroy_after: Run terraform destroy after context it returned back.
     :type destroy_after: bool
-    :return: Nothing. The function just yields to use it in the `with`
+    :return: Nothing. The function just yields to use it in the ``with``
         block.
+    :raise CalledProcessError: if either of terraform commands (except ``terraform destroy``)
+        exits with non-zero.
     """
     cmds = [
         "terraform init -no-color",
@@ -413,7 +415,11 @@ def terraform_apply(path, destroy_after=True):
     ]
     try:
         for cmd in cmds:
-            execute(cmd.split(), stdout=None, stderr=None, cwd=path)
+            ret, cout, cerr = execute(cmd.split(), stdout=None, stderr=None, cwd=path)
+            if ret:
+                raise CalledProcessError(
+                    returncode=ret, cmd=cmd, output=cout, stderr=cerr
+                )
         yield
 
     finally:
