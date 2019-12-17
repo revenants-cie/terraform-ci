@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 
 import boto3
 
-__version__ = "0.8.1"
+__version__ = "0.8.2"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 LOG = logging.getLogger(__name__)
@@ -411,14 +411,17 @@ def terraform_apply(path, destroy_after=True):
             "-auto-approve"
         ),
     ]
-    for cmd in cmds:
-        execute(cmd.split(), stdout=None, stderr=None, cwd=path)
-    yield
-    if destroy_after:
-        execute(
-            "terraform destroy -var-file=configuration.tfvars "
-            "-input=false -auto-approve".split(),
-            stdout=None,
-            stderr=None,
-            cwd=path,
-        )
+    try:
+        for cmd in cmds:
+            execute(cmd.split(), stdout=None, stderr=None, cwd=path)
+        yield
+
+    finally:
+        if destroy_after:
+            execute(
+                "terraform destroy -var-file=configuration.tfvars "
+                "-input=false -auto-approve".split(),
+                stdout=None,
+                stderr=None,
+                cwd=path,
+            )
