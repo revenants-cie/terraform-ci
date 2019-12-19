@@ -5,9 +5,10 @@ import sys
 from contextlib import contextmanager
 from os import environ, path as osp
 from subprocess import Popen, PIPE, CalledProcessError
+from urllib.parse import urlparse
 
 import boto3
-from urllib.parse import urlparse
+
 
 __version__ = "0.8.4"
 
