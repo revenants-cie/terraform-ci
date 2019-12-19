@@ -9,7 +9,8 @@ from urllib.parse import urlparse
 
 import boto3
 
-__version__ = "0.8.3"
+
+__version__ = "0.8.4"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 LOG = logging.getLogger(__name__)
@@ -390,8 +391,22 @@ def setup_logging(logger, debug=False):  # pragma: no cover
     logger.setLevel(logging.DEBUG)
 
 
+def terraform_output(path):
+    """
+    Run terraform output and return the json results as a dict
+    :param path: Path to directory with terraform module.
+    :type path: str
+    :return: dict from terraform output
+    """
+    cmd = "terraform output -json"
+    ret, cout, cerr = execute(cmd.split(), stdout=PIPE, stderr=None, cwd=path)
+    if ret:
+        raise CalledProcessError(returncode=ret, cmd=cmd, output=cout, stderr=cerr)
+    return json.loads(cout)
+
+
 @contextmanager
-def terraform_apply(path, destroy_after=True):
+def terraform_apply(path, destroy_after=True, json_output=False):
     """
     Run terraform init and apply, then return a generator.
     If destroy_after is True, run terraform destroy afterwards.
@@ -400,8 +415,10 @@ def terraform_apply(path, destroy_after=True):
     :type path: str
     :param destroy_after: Run terraform destroy after context it returned back.
     :type destroy_after: bool
-    :return: Nothing. The function just yields to use it in the ``with``
-        block.
+    :param json_output: Yield terraform output result as a dict (available in the context)
+    :type json_output: bool
+    :return: If json_output is true then yield the result from terraform_output otherwise nothing.
+        Use it in the ``with`` block.
     :raise CalledProcessError: if either of terraform commands (except ``terraform destroy``)
         exits with non-zero.
     """
@@ -420,7 +437,10 @@ def terraform_apply(path, destroy_after=True):
                 raise CalledProcessError(
                     returncode=ret, cmd=cmd, output=cout, stderr=cerr
                 )
-        yield
+        if json_output:
+            yield terraform_output(path)
+        else:
+            yield
 
     finally:
         if destroy_after:
