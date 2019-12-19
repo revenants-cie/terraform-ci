@@ -9,7 +9,7 @@ from subprocess import Popen, PIPE, CalledProcessError
 import boto3
 from urllib.parse import urlparse
 
-__version__ = "0.8.3"
+__version__ = "0.8.4"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 LOG = logging.getLogger(__name__)
