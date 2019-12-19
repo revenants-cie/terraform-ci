@@ -389,6 +389,7 @@ def setup_logging(logger, debug=False):  # pragma: no cover
 
     logger.setLevel(logging.DEBUG)
 
+
 def terraform_output(path):
     """
     Run terraform output and return the json results as a dict
@@ -399,10 +400,9 @@ def terraform_output(path):
     cmd = "terraform output -json"
     ret, cout, cerr = execute(cmd.split(), stdout=PIPE, stderr=None, cwd=path)
     if ret:
-        raise CalledProcessError(
-            returncode=ret, cmd=cmd, output=cout, stderr=cerr
-        )
+        raise CalledProcessError(returncode=ret, cmd=cmd, output=cout, stderr=cerr)
     return json.loads(cout)
+
 
 @contextmanager
 def terraform_apply(path, destroy_after=True, json_output=False):
