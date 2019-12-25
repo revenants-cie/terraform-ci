@@ -393,10 +393,12 @@ def setup_logging(logger, debug=False):  # pragma: no cover
 
 def terraform_output(path):
     """
-    Run terraform output and return the json results as a dict
+    Run terraform output and return the json results as a dict.
+
     :param path: Path to directory with terraform module.
     :type path: str
     :return: dict from terraform output
+    :rtype: dict
     """
     cmd = "terraform output -json"
     ret, cout, cerr = execute(cmd.split(), stdout=PIPE, stderr=None, cwd=path)
@@ -406,7 +408,9 @@ def terraform_output(path):
 
 
 @contextmanager
-def terraform_apply(path, destroy_after=True, json_output=False):
+def terraform_apply(
+    path, destroy_after=True, json_output=False, var_file="configuration.tfvars"
+):
     """
     Run terraform init and apply, then return a generator.
     If destroy_after is True, run terraform destroy afterwards.
@@ -417,6 +421,8 @@ def terraform_apply(path, destroy_after=True, json_output=False):
     :type destroy_after: bool
     :param json_output: Yield terraform output result as a dict (available in the context)
     :type json_output: bool
+    :param var_file: Path to a file with terraform variables.
+    :type var_file: str
     :return: If json_output is true then yield the result from terraform_output otherwise nothing.
         Use it in the ``with`` block.
     :raise CalledProcessError: if either of terraform commands (except ``terraform destroy``)
@@ -426,8 +432,8 @@ def terraform_apply(path, destroy_after=True, json_output=False):
         "terraform init -no-color",
         "terraform get -update=true -no-color",
         (
-            "terraform apply -var-file=configuration.tfvars -input=false "
-            "-auto-approve"
+            "terraform apply -var-file={var_file} -input=false "
+            "-auto-approve".format(var_file=var_file)
         ),
     ]
     try:
@@ -445,8 +451,8 @@ def terraform_apply(path, destroy_after=True, json_output=False):
     finally:
         if destroy_after:
             execute(
-                "terraform destroy -var-file=configuration.tfvars "
-                "-input=false -auto-approve".split(),
+                "terraform destroy -var-file={var_file} "
+                "-input=false -auto-approve".format(var_file=var_file).split(),
                 stdout=None,
                 stderr=None,
                 cwd=path,
