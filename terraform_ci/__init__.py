@@ -409,7 +409,10 @@ def terraform_output(path):
 
 @contextmanager
 def terraform_apply(
-    path, destroy_after=True, json_output=False, var_file="configuration.tfvars"
+    path,  # pylint: disable=bad-continuation
+    destroy_after=True,  # pylint: disable=bad-continuation
+    json_output=False,  # pylint: disable=bad-continuation
+    var_file="configuration.tfvars",  # pylint: disable=bad-continuation
 ):
     """
     Run terraform init and apply, then return a generator.
