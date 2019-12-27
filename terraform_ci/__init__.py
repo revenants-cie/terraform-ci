@@ -3,14 +3,17 @@ import json
 import logging
 import sys
 from contextlib import contextmanager
+from glob import glob
 from os import environ, path as osp
+from shutil import copy2, rmtree
 from subprocess import Popen, PIPE, CalledProcessError
+from tempfile import mkdtemp
 from urllib.parse import urlparse
 
 import boto3
+import hcl
 
-
-__version__ = "0.9.0"
+__version__ = "0.10.0"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 LOG = logging.getLogger(__name__)
@@ -460,3 +463,47 @@ def terraform_apply(
                 stderr=None,
                 cwd=path,
             )
+
+
+@contextmanager
+def strip_backend(path):
+    """
+    Copy terraform file (found by a suffix ``*.tf``) to a temporary directory.
+    While copying look for backend configuration and skip it.
+    This is needed to prepare module code for a unit test. In the production module
+    you may want to configure state to save in an S3 bucket, but for a test it's not needed,
+    the state is temporary.
+
+    The function returns path to the temporary directory.
+
+    After the function exits the ``with`` scope the temporary directory will be removed.
+
+    :param path: path to terraform module.
+    :type path: str
+    :return: Path to temporary directory with the original terraform files except
+        one with the backend configuration.
+    :rtype: str
+    """
+    tmpdir = mkdtemp()
+
+    def copy_file(src, dst):
+        LOG.debug("%s => %s", src, dst)
+        copy2(src, dst)
+
+    try:
+        for tf_file in glob(osp.join(path, "*.tf")):
+            try:
+                if "terraform" in hcl.load(open(tf_file)):
+                    LOG.debug("Found backend config in %s. Skipping it.", tf_file)
+                    continue
+
+                copy_file(tf_file, osp.join(tmpdir, osp.basename(tf_file)))
+
+            except ValueError:
+                LOG.warning("Failed to parse %s, will copy it anyway.", tf_file)
+                copy_file(tf_file, osp.join(tmpdir, osp.basename(tf_file)))
+
+        yield tmpdir
+
+    finally:
+        rmtree(tmpdir)
