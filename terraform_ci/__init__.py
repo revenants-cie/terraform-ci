@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 import boto3
 import hcl
 
-__version__ = "0.10.0"
+__version__ = "0.10.1"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 DEFAULT_PROGRESS_INTERVAL = 10
