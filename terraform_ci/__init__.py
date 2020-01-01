@@ -240,7 +240,13 @@ def run_job(path, action):
     return status
 
 
-def execute(cmd, stdout=PIPE, stderr=PIPE, cwd=None, progress_interval=DEFAULT_PROGRESS_INTERVAL):
+def execute(
+    cmd,  # pylint: disable=bad-continuation
+    stdout=PIPE,  # pylint: disable=bad-continuation
+    stderr=PIPE,  # pylint: disable=bad-continuation
+    cwd=None,  # pylint: disable=bad-continuation
+    progress_interval=DEFAULT_PROGRESS_INTERVAL,  # pylint: disable=bad-continuation
+):
     """
     Execute a command and return a tuple with return code, STDOUT and STDERR.
 
