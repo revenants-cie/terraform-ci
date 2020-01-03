@@ -40,7 +40,7 @@ def delete_outdated_comments(
     status,  # pylint: disable=bad-continuation
     repo,  # pylint: disable=bad-continuation
     pull_request,  # pylint: disable=bad-continuation
-    github_token=os.environ["GITHUB_TOKEN"],  # pylint: disable=bad-continuation
+    github_token=None,  # pylint: disable=bad-continuation
 ):
     """
     Pull list of comments in the PR and delete old one those:
@@ -58,6 +58,9 @@ def delete_outdated_comments(
         environment variable.
     :type github_token: str
     """
+    if github_token is None:
+        github_token = os.environ["GITHUB_TOKEN"]
+
     github_client = Github(github_token)
     repo_object = github_client.get_repo(repo)
     pull = repo_object.get_pull(pull_request)
