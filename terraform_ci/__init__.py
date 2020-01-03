@@ -5,6 +5,7 @@ import logging
 import os
 import sys
 from base64 import b64encode
+import time
 from contextlib import contextmanager
 from glob import glob
 from os import environ, path as osp
@@ -21,6 +22,7 @@ from github import Github
 __version__ = "0.11.0"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
+DEFAULT_PROGRESS_INTERVAL = 10
 LOG = logging.getLogger(__name__)
 
 
@@ -339,7 +341,13 @@ def run_job(path, action):
     return status
 
 
-def execute(cmd, stdout=PIPE, stderr=PIPE, cwd=None):
+def execute(
+    cmd,  # pylint: disable=bad-continuation
+    stdout=PIPE,  # pylint: disable=bad-continuation
+    stderr=PIPE,  # pylint: disable=bad-continuation
+    cwd=None,  # pylint: disable=bad-continuation
+    progress_interval=DEFAULT_PROGRESS_INTERVAL,  # pylint: disable=bad-continuation
+):
     """
     Execute a command and return a tuple with return code, STDOUT and STDERR.
 
@@ -351,11 +359,22 @@ def execute(cmd, stdout=PIPE, stderr=PIPE, cwd=None):
     :type stderr: int, None
     :param cwd: Working directory.
     :type cwd: str
+    :param progress_interval: Print a message every this many seconds to give a user feedback.
+    :type progress_interval: int
     :return: Tuple (return code, STDOUT, STDERR)
     :rtype: tuple
     """
     LOG.info("Executing: %s", " ".join(cmd))
     proc = Popen(cmd, stdout=stdout, stderr=stderr, cwd=cwd)
+    last_checking = time.time()
+    while True:
+        if proc.poll() is not None:
+            break
+        if time.time() - last_checking > progress_interval:
+            LOG.info("Still waiting for process to complete.")
+            last_checking = time.time()
+        time.sleep(1)
+
     cout, cerr = proc.communicate()
     return proc.returncode, cout, cerr
 
