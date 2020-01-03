@@ -12,6 +12,7 @@ from terraform_ci import (
     convert_to_newlines,
     setup_logging,
     LOG,
+    delete_outdated_comments,
 )
 from terraform_ci.post_plan import post_comment
 
@@ -79,6 +80,9 @@ def terraform_ci(debug, modules_path, module_name, env_file, action):
         sys.exit(EX_SOFTWARE)
 
     if pull_request:
+        delete_outdated_comments(
+            status, environ["TRAVIS_REPO_SLUG"], int(environ["TRAVIS_PULL_REQUEST"])
+        )
         post_comment(comment=render_comment(status))
     else:
         LOG.info("Standard output:")

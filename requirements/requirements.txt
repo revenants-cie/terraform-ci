@@ -1,4 +1,5 @@
 boto3 ~= 1.10
 Click ~= 7.0
+PyGithub ~= 1.45
 pyhcl ~= 0.3
 requests ~= 2.22
