@@ -18,7 +18,7 @@ import boto3
 import hcl
 from github import Github
 
-__version__ = "0.10.0"
+__version__ = "0.11.0"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 LOG = logging.getLogger(__name__)
