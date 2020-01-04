@@ -58,27 +58,36 @@ def delete_outdated_comments(
     :type pull_request: int
     :param github_token: GitHub personal token. By default it reads from ``GITHUB_TOKEN``
         environment variable.
-    :type github_token: str
+    :type github_token: str,None
     """
-    if github_token is None:
-        github_token = os.environ["GITHUB_TOKEN"]
+    github_kwargs = {}
 
-    github_client = Github(github_token)
+    if github_token is None:
+        github_token = os.environ.get("GITHUB_TOKEN")
+
+    if github_token:
+        github_kwargs["login_or_token"] = github_token
+
+    github_client = Github(**github_kwargs)
     repo_object = github_client.get_repo(repo)
     pull = repo_object.get_pull(pull_request)
     current_user = github_client.get_user().login
 
-    for comment in pull.get_issue_comments():
+    comments = pull.get_issue_comments()
+    for comment in comments:
         author = comment.user.login
         status_in_comment = get_status_from_comment(comment.body)
-        if all(
-            (  # pylint: disable=bad-continuation
+        try:
+            delete_criteria = (
                 author == current_user,
-                status_in_comment,
-                sorted(status_in_comment.keys()) == sorted(status.keys()),
+                status_in_comment is not None,
+                status_in_comment.keys() == status.keys(),
             )
-        ):
-            comment.delete()
+            if all(delete_criteria):
+                comment.delete()
+
+        except AttributeError:
+            pass
 
 
 def get_status_from_comment(comment_text):
