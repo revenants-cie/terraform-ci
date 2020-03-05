@@ -7,6 +7,7 @@ from terraform_ci import (
     DEFAULT_TERRAFORM_VARS,
     setup_environment,
     run_job,
+    assume_aws_role,
     render_comment,
     module_name_from_path,
     convert_to_newlines,
@@ -38,19 +39,33 @@ from terraform_ci.post_plan import post_comment
     default=DEFAULT_TERRAFORM_VARS,
     show_default=True,
 )
+@click.option(
+    "--aws-assume-role-arn",
+    help="ARN of any role the environment should assume before running terraform.",
+    default="",
+    show_default=False,
+    required=False,
+)
 @click.argument("action", type=click.Choice(["plan", "apply", "destroy"]))
-def terraform_ci(debug, modules_path, module_name, env_file, action):
+def terraform_ci(**kwargs):
     """
     Run Terraform action.
 
     The tool prepares environment, sets environment variables for
-    API keys, passwords etc.
+    API keys, passwords, roles etc.
 
     It then runs a terraform action which may be either plan or apply.
 
     ci-runner can be called in a CI environment or locally on
     a workstation.
     """
+    debug = kwargs["debug"]
+    modules_path = kwargs["modules_path"]
+    module_name = kwargs["module_name"]
+    env_file = kwargs["env_file"]
+    aws_assume_role_arn = kwargs["aws_assume_role_arn"]
+    action = kwargs["action"]
+
     setup_logging(LOG, debug=debug)
 
     try:
@@ -64,6 +79,9 @@ def terraform_ci(debug, modules_path, module_name, env_file, action):
 
     except FileNotFoundError:
         LOG.warning("Environment file %s doesn't exit", env_file)
+
+    if aws_assume_role_arn:
+        assume_aws_role(aws_assume_role_arn)
 
     # module name is parent directory
     mod = module_name or module_name_from_path(modules_path)

@@ -19,7 +19,7 @@ import boto3
 import hcl
 from github import Github
 
-__version__ = "0.11.1"
+__version__ = "0.12.0"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 DEFAULT_PROGRESS_INTERVAL = 10
@@ -323,6 +323,28 @@ def parse_plan(output):
         pass
 
     return add, change, destroy
+
+
+def assume_aws_role(arn):
+    """
+    Given an AWS STS Role ARN, this function attempts to assume the role
+    and set the environment variables to the temporary credentials.
+    This will only affect the environment that terraform-ci is running in.
+
+    :param arn: full arn to assume,
+        for example: arn:aws:iam::ACCOUNTID:role/SomeOtherRole
+    :type arn: str
+    :return: None
+    :rtype: None
+    """
+    client = boto3.client("sts")
+    response = client.assume_role(
+        DurationSeconds=3600, RoleArn=arn, RoleSessionName="terraform-ci"
+    )
+    credentials = response["Credentials"]
+    os.environ["AWS_ACCESS_KEY_ID"] = credentials["AccessKeyId"]
+    os.environ["AWS_SECRET_ACCESS_KEY"] = credentials["SecretAccessKey"]
+    os.environ["AWS_SESSION_TOKEN"] = credentials["SessionToken"]
 
 
 def run_job(path, action):
