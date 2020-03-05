@@ -335,16 +335,14 @@ def assume_aws_role(arn):
     :return: None
     :rtype: None
     """
-    client = boto3.client('sts')
+    client = boto3.client("sts")
     response = client.assume_role(
-        DurationSeconds=3600,
-        RoleArn=arn,
-        RoleSessionName='terraform-ci',
+        DurationSeconds=3600, RoleArn=arn, RoleSessionName="terraform-ci"
     )
-    credentials = response['Credentials']
-    os.environ['AWS_ACCESS_KEY_ID'] = credentials['AccessKeyId']
-    os.environ['AWS_SECRET_ACCESS_KEY'] = credentials['SecretAccessKey']
-    os.environ['AWS_SESSION_TOKEN'] = credentials['SessionToken']
+    credentials = response["Credentials"]
+    os.environ["AWS_ACCESS_KEY_ID"] = credentials["AccessKeyId"]
+    os.environ["AWS_SECRET_ACCESS_KEY"] = credentials["SecretAccessKey"]
+    os.environ["AWS_SESSION_TOKEN"] = credentials["SessionToken"]
 
 
 def run_job(path, action):

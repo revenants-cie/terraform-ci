@@ -44,10 +44,12 @@ from terraform_ci.post_plan import post_comment
     help="ARN of any role the environment should assume before running terraform.",
     default="",
     show_default=False,
-    required=False
+    required=False,
 )
 @click.argument("action", type=click.Choice(["plan", "apply", "destroy"]))
-def terraform_ci(debug, modules_path, module_name, env_file, aws_assume_role_arn, action):
+def terraform_ci(
+    debug, modules_path, module_name, env_file, aws_assume_role_arn, action
+):
     """
     Run Terraform action.
 
