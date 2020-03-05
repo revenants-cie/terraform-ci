@@ -327,10 +327,12 @@ def parse_plan(output):
 
 def assume_aws_role(arn):
     """
-    Given an AWS STS Role ARN, this function attempts to assume the role and set the environment variables to the
-    temporary credentials. This will only affect the environment that terraform-ci is running in.
+    Given an AWS STS Role ARN, this function attempts to assume the role
+    and set the environment variables to the temporary credentials.
+    This will only affect the environment that terraform-ci is running in.
 
-    :param arn: full arn to assume, for example: arn:aws:iam::ACCOUNTID:role/SomeOtherRole
+    :param arn: full arn to assume,
+        for example: arn:aws:iam::ACCOUNTID:role/SomeOtherRole
     :type arn: str
     :return: None
     :rtype: None
