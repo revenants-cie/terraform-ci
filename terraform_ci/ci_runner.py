@@ -47,7 +47,7 @@ from terraform_ci.post_plan import post_comment
     required=False,
 )
 @click.argument("action", type=click.Choice(["plan", "apply", "destroy"]))
-def terraform_ci(debug, modules_path, module_name, env_file, aws_arn, action):
+def terraform_ci(**kwargs):
     """
     Run Terraform action.
 
@@ -59,6 +59,13 @@ def terraform_ci(debug, modules_path, module_name, env_file, aws_arn, action):
     ci-runner can be called in a CI environment or locally on
     a workstation.
     """
+    debug = kwargs['debug']
+    modules_path = kwargs['modules_path']
+    module_name = kwargs['module_name']
+    env_file = kwargs['env_file']
+    aws_assume_role_arn = kwargs['aws_assume_role_arn']
+    action = kwargs['action']
+
     setup_logging(LOG, debug=debug)
 
     try:
@@ -73,8 +80,8 @@ def terraform_ci(debug, modules_path, module_name, env_file, aws_arn, action):
     except FileNotFoundError:
         LOG.warning("Environment file %s doesn't exit", env_file)
 
-    if aws_arn:
-        assume_aws_role(aws_arn)
+    if aws_assume_role_arn:
+        assume_aws_role(aws_assume_role_arn)
 
     # module name is parent directory
     mod = module_name or module_name_from_path(modules_path)
