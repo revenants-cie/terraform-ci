@@ -74,7 +74,7 @@ def terraform_ci(debug, modules_path, module_name, env_file, aws_arn, action):
         LOG.warning("Environment file %s doesn't exit", env_file)
 
     if aws_arn:
-        assume_aws_role(aws_arns)
+        assume_aws_role(aws_arn)
 
     # module name is parent directory
     mod = module_name or module_name_from_path(modules_path)
