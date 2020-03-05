@@ -59,12 +59,12 @@ def terraform_ci(**kwargs):
     ci-runner can be called in a CI environment or locally on
     a workstation.
     """
-    debug = kwargs['debug']
-    modules_path = kwargs['modules_path']
-    module_name = kwargs['module_name']
-    env_file = kwargs['env_file']
-    aws_assume_role_arn = kwargs['aws_assume_role_arn']
-    action = kwargs['action']
+    debug = kwargs["debug"]
+    modules_path = kwargs["modules_path"]
+    module_name = kwargs["module_name"]
+    env_file = kwargs["env_file"]
+    aws_assume_role_arn = kwargs["aws_assume_role_arn"]
+    action = kwargs["action"]
 
     setup_logging(LOG, debug=debug)
 
