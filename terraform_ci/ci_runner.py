@@ -74,14 +74,14 @@ def terraform_ci(**kwargs):
     except KeyError:
         pull_request = False
 
+    if aws_assume_role_arn:
+        assume_aws_role(aws_assume_role_arn)
+
     try:
         setup_environment(env_file)
 
     except FileNotFoundError:
         LOG.warning("Environment file %s doesn't exit", env_file)
-
-    if aws_assume_role_arn:
-        assume_aws_role(aws_assume_role_arn)
 
     # module name is parent directory
     mod = module_name or module_name_from_path(modules_path)
