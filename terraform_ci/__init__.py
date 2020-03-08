@@ -430,7 +430,8 @@ def read_from_secretsmanager(url):
     :return: Secret value that is stored in a JSON key "json key".
     :rtype: str
     """
-    client = boto3.client("secretsmanager")
+    session = boto3.Session()
+    client = session.client("secretsmanager")
     location = urlparse(url)
     full_path = location.netloc + location.path
     aws_response = client.get_secret_value(SecretId=full_path.split(":")[0])
