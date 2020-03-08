@@ -26,7 +26,9 @@ from terraform_ci import read_from_secretsmanager
 def test_read_from_secretsmanager(mock_boto3, url, key, secret_string):
     """Read secret from correct ID"""
     mock_client = mock.Mock()
-    mock_boto3.client.return_value = mock_client
+    mock_session = mock.Mock()
+    mock_boto3.Session.return_value = mock_session
+    mock_session.client.return_value = mock_client
     mock_client.get_secret_value.return_value = {
         'ARN': 'string',
         'Name': 'string',
