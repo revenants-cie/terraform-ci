@@ -19,7 +19,7 @@ import boto3
 import hcl
 from github import Github
 
-__version__ = "0.13.0"
+__version__ = "0.13.1"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 DEFAULT_PROGRESS_INTERVAL = 10
@@ -372,6 +372,8 @@ def run_job(path, action):
         ["make", "-C", path, action], stdout=stdout, stderr=stderr
     )
     status = {"success": returncode == 0, "stderr": cerr, "stdout": cout}
+    if cout is None:
+        cout = b""
     parse_tree = parse_plan(cout.decode("utf-8"))
     status["add"] = parse_tree[0]
     status["change"] = parse_tree[1]
