@@ -372,6 +372,8 @@ def run_job(path, action):
         ["make", "-C", path, action], stdout=stdout, stderr=stderr
     )
     status = {"success": returncode == 0, "stderr": cerr, "stdout": cout}
+    if cout is None:
+        cout = b""
     parse_tree = parse_plan(cout.decode("utf-8"))
     status["add"] = parse_tree[0]
     status["change"] = parse_tree[1]
