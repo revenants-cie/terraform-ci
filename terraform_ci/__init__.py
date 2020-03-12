@@ -518,7 +518,7 @@ def convert_to_newlines(text):
     :return: Text where \n are replaced with actual new lines.
     :rtype: str
     """
-    return text.replace(b"\\n", b"\n").decode("UTF-8")
+    return text.replace(b"\\n", b"\n").decode("UTF-8") if text else ""
 
 
 def setup_logging(logger, debug=False):  # pragma: no cover
