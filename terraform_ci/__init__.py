@@ -365,7 +365,12 @@ def run_job(path, action):
         }
     :rtype: dict
     """
-    returncode, cout, cerr = execute(["make", "-C", path, action])
+    stdout = PIPE if action == "plan" else None
+    stderr = PIPE if action == "plan" else None
+
+    returncode, cout, cerr = execute(
+        ["make", "-C", path, action], stdout=stdout, stderr=stderr
+    )
     status = {"success": returncode == 0, "stderr": cerr, "stdout": cout}
     parse_tree = parse_plan(cout.decode("utf-8"))
     status["add"] = parse_tree[0]
