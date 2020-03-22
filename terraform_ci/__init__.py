@@ -19,7 +19,7 @@ import boto3
 import hcl
 from github import Github
 
-__version__ = "0.14.0"
+__version__ = "1.0.0"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 DEFAULT_PROGRESS_INTERVAL = 10
@@ -446,7 +446,7 @@ def read_from_secretsmanager(url, role=None):
         session = boto3.Session(
             aws_access_key_id=response["Credentials"]["AccessKeyId"],
             aws_secret_access_key=response["Credentials"]["SecretAccessKey"],
-            aws_session_token=response["Credentials"]["SessionToken"]
+            aws_session_token=response["Credentials"]["SessionToken"],
         )
     else:
         session = boto3.Session()
