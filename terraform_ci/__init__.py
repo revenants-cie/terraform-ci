@@ -420,7 +420,7 @@ def execute(
     return proc.returncode, cout, cerr
 
 
-def read_from_secretsmanager(url):
+def read_from_secretsmanager(url, role=None):
     """
     Read a secret from AWS secrets manager.
 
@@ -434,11 +434,25 @@ def read_from_secretsmanager(url):
 
     :param url: URL to a secret value.
     :type url: str
+    :param role: AWS role ARN to assume while reading secrets.
     :return: Secret value that is stored in a JSON key "json key".
     :rtype: str
     """
-    session = boto3.Session()
+    if role:
+        client = boto3.client("sts")
+        response = client.assume_role(
+            DurationSeconds=3600, RoleArn=role, RoleSessionName="terraform-ci"
+        )
+        session = boto3.Session(
+            aws_access_key_id=response["Credentials"]["AccessKeyId"],
+            aws_secret_access_key=response["Credentials"]["SecretAccessKey"],
+            aws_session_token=response["Credentials"]["SessionToken"]
+        )
+    else:
+        session = boto3.Session()
+
     client = session.client("secretsmanager")
+
     location = urlparse(url)
     full_path = location.netloc + location.path
     aws_response = client.get_secret_value(SecretId=full_path.split(":")[0])
@@ -449,7 +463,7 @@ def read_from_secretsmanager(url):
         return aws_response["SecretString"]
 
 
-def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
+def setup_environment(config_path=DEFAULT_TERRAFORM_VARS, role=None):
     """
     Read AWS variables from Terraform config and set them
     as environment variables
@@ -481,7 +495,7 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS):
 
     for key, value in tf_vars.items():
         if value.startswith("secretsmanager://"):
-            environ[key] = read_from_secretsmanager(value)
+            environ[key] = read_from_secretsmanager(value, role=role)
         else:
             environ[key] = value
 
