@@ -7,7 +7,6 @@ from terraform_ci import (
     DEFAULT_TERRAFORM_VARS,
     setup_environment,
     run_job,
-    assume_aws_role,
     render_comment,
     module_name_from_path,
     convert_to_newlines,
