@@ -7,7 +7,6 @@ from terraform_ci import (
     DEFAULT_TERRAFORM_VARS,
     setup_environment,
     run_job,
-    assume_aws_role,
     render_comment,
     module_name_from_path,
     convert_to_newlines,
@@ -42,7 +41,7 @@ from terraform_ci.post_plan import post_comment
 )
 @click.option(
     "--aws-assume-role-arn",
-    help="ARN of any role the environment should assume before running terraform.",
+    help="ARN of any role the environment should assume to setup environment.",
     default="",
     show_default=False,
     required=False,
@@ -75,11 +74,8 @@ def terraform_ci(**kwargs):
     except KeyError:
         pull_request = False
 
-    if aws_assume_role_arn:
-        assume_aws_role(aws_assume_role_arn)
-
     try:
-        setup_environment(env_file)
+        setup_environment(env_file, role=aws_assume_role_arn)
 
     except FileNotFoundError:
         LOG.warning("Environment file %s doesn't exit", env_file)
