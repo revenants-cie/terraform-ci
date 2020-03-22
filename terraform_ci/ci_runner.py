@@ -14,6 +14,7 @@ from terraform_ci import (
     setup_logging,
     LOG,
     delete_outdated_comments,
+    terraform_output,
 )
 from terraform_ci.post_plan import post_comment
 
@@ -88,6 +89,13 @@ def terraform_ci(**kwargs):
     LOG.info("Processing module %s", mod)
 
     status = {mod: run_job(osp.join(modules_path), action)}
+    outputs = terraform_output(osp.join(modules_path))
+    if "github_token" in outputs:
+        LOG.info(
+            "Setting GITHUB_TOKEN and TF_VAR_github_token environment variable from module outputs."
+        )
+        environ["GITHUB_TOKEN"] = outputs["github_token"]["value"]
+        environ["TF_VAR_github_token"] = outputs["github_token"]["value"]
 
     if status[mod]["success"]:
         LOG.info("%s success: %s", mod, status[mod]["success"])
