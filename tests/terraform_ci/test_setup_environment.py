@@ -120,7 +120,8 @@ def test_setup_environment_from_secretsmanager(
     mock_read_from_secretsmanager.return_value = 'foo_value'
     setup_environment(config_path=str(conf))
     mock_read_from_secretsmanager.assert_called_once_with(
-        'secretsmanager:///path/to/secret:key'
+        'secretsmanager:///path/to/secret:key',
+        role=None
     )
     assert environ["TF_VAR_fookey"] == "foo_value"
 
@@ -149,6 +150,7 @@ def test_setup_environment_from_secretsmanager_github(
     mock_read_from_secretsmanager.return_value = 'foo_value'
     setup_environment(config_path=str(conf))
     mock_read_from_secretsmanager.assert_called_once_with(
-        'secretsmanager:///path/to/secret:key'
+        'secretsmanager:///path/to/secret:key',
+        role=None
     )
     assert environ["GITHUB_TOKEN"] == "foo_value"
