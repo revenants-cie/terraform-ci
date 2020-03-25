@@ -33,24 +33,20 @@ from terraform_ci import render_comment
 **github** | ![#f03c15](https://placehold.it/15/f03c15/000000?text=+) `False` | 0 | 0 | 0
 
 # **cloudflare**
-
-## stdout
-
+<details><summary>STDOUT</summary>
 ```cloudflare plan```
-
-## stderr
-
+</details>
+<details><summary>STDERR</summary>
 _no output_
+</details>
 
 # **github**
-
-## stdout
-
+<details><summary>STDOUT</summary>
 ```github plan```
-
-## stderr
-
+</details>
+<details><summary>STDERR</summary>
 ```some output```
+</details>
 
 <details><summary><i>metadata</i></summary>
 <p>
@@ -76,9 +72,7 @@ _no output_
 **cloudflare** | ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `True` | 0 | 0 | 0
 
 # **cloudflare**
-
-## stdout
-
+<details><summary>STDOUT</summary>
 ```terraform init -no-color
 
 Initializing the backend...
@@ -127,10 +121,10 @@ This means that Terraform did not detect any differences between your
 configuration and real physical resources that exist. As a result, no
 actions need to be performed.
 ```
-
-## stderr
-
+</details>
+<details><summary>STDERR</summary>
 _no output_
+</details>
 
 <details><summary><i>metadata</i></summary>
 <p>
@@ -156,14 +150,12 @@ _no output_
 **cloudflare** | ![#c5f015](https://placehold.it/15/c5f015/000000?text=+) `True` | Unknown | Unknown | Unknown
 
 # **cloudflare**
-
-## stdout
-
+<details><summary>STDOUT</summary>
 ```foo```
-
-## stderr
-
+</details>
+<details><summary>STDERR</summary>
 _no output_
+</details>
 
 <details><summary><i>metadata</i></summary>
 <p>

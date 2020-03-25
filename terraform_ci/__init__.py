@@ -19,7 +19,7 @@ import boto3
 import hcl
 from github import Github
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 DEFAULT_PROGRESS_INTERVAL = 10
@@ -244,14 +244,12 @@ def render_comment(status):
 
         line = """
 # **{module}**
-
-## stdout
-
+<details><summary>STDOUT</summary>
 {cout}
-
-## stderr
-
+</details>
+<details><summary>STDERR</summary>
 {cerr}
+</details>
 """
         line = line.format(
             module=key,
