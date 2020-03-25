@@ -244,14 +244,12 @@ def render_comment(status):
 
         line = """
 # **{module}**
-
-## stdout
-
+<details><summary>STDOUT</summary>
 {cout}
-
-## stderr
-
+</details>
+<details><summary>STDERR</summary>
 {cerr}
+</details>
 """
         line = line.format(
             module=key,
