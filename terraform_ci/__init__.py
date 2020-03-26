@@ -245,9 +245,11 @@ def render_comment(status):
         line = """
 # **{module}**
 <details><summary>STDOUT</summary>
+
 {cout}
 </details>
 <details><summary>STDERR</summary>
+
 {cerr}
 </details>
 """

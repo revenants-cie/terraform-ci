@@ -34,17 +34,21 @@ from terraform_ci import render_comment
 
 # **cloudflare**
 <details><summary>STDOUT</summary>
+
 ```cloudflare plan```
 </details>
 <details><summary>STDERR</summary>
+
 _no output_
 </details>
 
 # **github**
 <details><summary>STDOUT</summary>
+
 ```github plan```
 </details>
 <details><summary>STDERR</summary>
+
 ```some output```
 </details>
 
@@ -73,6 +77,7 @@ _no output_
 
 # **cloudflare**
 <details><summary>STDOUT</summary>
+
 ```terraform init -no-color
 
 Initializing the backend...
@@ -123,6 +128,7 @@ actions need to be performed.
 ```
 </details>
 <details><summary>STDERR</summary>
+
 _no output_
 </details>
 
@@ -151,9 +157,11 @@ _no output_
 
 # **cloudflare**
 <details><summary>STDOUT</summary>
+
 ```foo```
 </details>
 <details><summary>STDERR</summary>
+
 _no output_
 </details>
 
