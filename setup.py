@@ -25,7 +25,7 @@ SETUP_REQUIREMENTS = parse_requirements("requirements/requirements_setup.txt")
 if __name__ == "__main__":
     setup(
         name="terraform-ci",
-        version="1.1.1",
+        version="1.2.0",
         description="Terraform CI runs terraform in Travis-CI",
         long_description=dedent(
             """
@@ -42,6 +42,7 @@ if __name__ == "__main__":
             "console_scripts": [
                 "install-terraform=terraform_ci.install_terraform:main",
                 "terraform-ci=terraform_ci.ci_runner:terraform_ci",
+                "terraform-cd=terraform_ci.terraform_cd:terraform_cd",
             ]
         },
         include_package_data=True,
