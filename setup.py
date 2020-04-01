@@ -42,6 +42,7 @@ if __name__ == "__main__":
             "console_scripts": [
                 "install-terraform=terraform_ci.install_terraform:main",
                 "terraform-ci=terraform_ci.ci_runner:terraform_ci",
+                "terraform-cd=terraform_ci.terraform_cd:terraform_cd",
             ]
         },
         include_package_data=True,

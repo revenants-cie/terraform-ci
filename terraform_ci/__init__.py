@@ -468,43 +468,48 @@ def setup_environment(config_path=DEFAULT_TERRAFORM_VARS, role=None):
     Read AWS variables from Terraform config and set them
     as environment variables
     """
-    with open(config_path) as f_descr:
-        tf_vars = json.loads(f_descr.read())
+    try:
+        with open(config_path) as f_descr:
+            tf_vars = json.loads(f_descr.read())
 
-    var_map = {
-        "TF_VAR_aws_access_key": ["AWS_ACCESS_KEY_ID", "TF_VAR_aws_access_key_id"],
-        "TF_VAR_aws_secret_key": [
-            "AWS_SECRET_ACCESS_KEY",
-            "TF_VAR_aws_secret_access_key",
-        ],
-    }
-    for key in var_map:
-        try:
-            for eq_key in var_map[key]:
-                environ[eq_key] = tf_vars[key]
+        var_map = {
+            "TF_VAR_aws_access_key": ["AWS_ACCESS_KEY_ID", "TF_VAR_aws_access_key_id"],
+            "TF_VAR_aws_secret_key": [
+                "AWS_SECRET_ACCESS_KEY",
+                "TF_VAR_aws_secret_access_key",
+            ],
+        }
+        for key in var_map:
+            try:
+                for eq_key in var_map[key]:
+                    environ[eq_key] = tf_vars[key]
 
-        except KeyError:
-            pass
+            except KeyError:
+                pass
 
-    for variable in ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]:
-        try:
-            environ[variable] = tf_vars["TF_VAR_{var}".format(var=variable.lower())]
+        for variable in ["AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"]:
+            try:
+                environ[variable] = tf_vars["TF_VAR_{var}".format(var=variable.lower())]
 
-        except KeyError as err:
-            LOG.debug("Key %s is missing in %s", err, config_path)
+            except KeyError as err:
+                LOG.debug("Key %s is missing in %s", err, config_path)
 
-    for key, value in tf_vars.items():
-        if value.startswith("secretsmanager://"):
-            environ[key] = read_from_secretsmanager(value, role=role)
-        else:
-            environ[key] = value
+        for key, value in tf_vars.items():
+            if value.startswith("secretsmanager://"):
+                environ[key] = read_from_secretsmanager(value, role=role)
+            else:
+                environ[key] = value
 
-    for variable in ["GITHUB_TOKEN"]:
-        try:
-            environ[variable] = environ["TF_VAR_{var}".format(var=variable.lower())]
+        for variable in ["GITHUB_TOKEN"]:
+            try:
+                environ[variable] = environ["TF_VAR_{var}".format(var=variable.lower())]
 
-        except KeyError as err:
-            LOG.debug("Key %s is missing in %s", err, config_path)
+            except KeyError as err:
+                LOG.debug("Key %s is missing in %s", err, config_path)
+
+    except FileNotFoundError as err:
+        LOG.warning(err)
+        LOG.warning("Will continue with unmodified environment variables.")
 
 
 def module_name_from_path(path):
