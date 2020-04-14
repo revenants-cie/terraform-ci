@@ -25,7 +25,7 @@ SETUP_REQUIREMENTS = parse_requirements("requirements/requirements_setup.txt")
 if __name__ == "__main__":
     setup(
         name="terraform-ci",
-        version="1.2.0",
+        version="1.2.1",
         description="Terraform CI runs terraform in Travis-CI",
         long_description=dedent(
             """

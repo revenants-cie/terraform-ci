@@ -16,8 +16,8 @@ help:
 
 .PHONY: bootstrap
 bootstrap: ## bootstrap the development environment
-	pip install -U "pip ~= 19.1"
-	pip install -U "setuptools ~= 41.0"
+	pip install -U "pip ~= 20.0"
+	pip install -U "setuptools ~= 46.0"
 	pip install -r requirements/requirements.txt \
 		-r requirements/requirements_setup.txt \
 		-r requirements/requirements_test.txt
