@@ -91,7 +91,10 @@ def terraform_cd(**kwargs):
 
             with open(osp.join(tmp_dir, release_archive), "rb") as archive_descriptor:
                 s3_client.upload_fileobj(
-                    archive_descriptor, bucket, osp.join(module_name, release_archive)
+                    archive_descriptor,
+                    bucket,
+                    osp.join(module_name, release_archive),
+                    ExtraArgs={"ACL": "bucket-owner-full-control"},
                 )
                 LOG.info(
                     "Published artifact to s3://%s/%s",
