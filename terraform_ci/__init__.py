@@ -368,7 +368,7 @@ def run_job(path, action):
     with TemporaryFile() as stdout_file:
         stdout = stdout_file if action == "plan" else None
 
-        returncode, cout, cerr = execute(
+        returncode, _, _ = execute(
             ["make", "-C", path, action], stdout=stdout, stderr=None
         )
         status = {
@@ -702,8 +702,8 @@ def _decode_str_in_dict(in_dict, encoding="utf-8"):
     """
     Decode all binary string values in a dictionary.
 
-    :param value: Input dictionary
-    :type value: dict
+    :param in_dict: Input dictionary
+    :type in_dict: dict
     :param encoding: Encoding to use. By default, 'utf-8'.
     :type encoding: str
     :return: Dictionary with all binary strings converted to encoded strings.
