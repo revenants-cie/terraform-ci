@@ -11,7 +11,7 @@ from glob import glob
 from os import environ, path as osp
 from shutil import copy2, rmtree
 from subprocess import Popen, PIPE, CalledProcessError
-from tempfile import mkdtemp
+from tempfile import mkdtemp, TemporaryFile
 from textwrap import dedent
 from urllib.parse import urlparse
 
@@ -19,7 +19,7 @@ import boto3
 import hcl
 from github import Github
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 DEFAULT_PROGRESS_INTERVAL = 10
@@ -365,21 +365,29 @@ def run_job(path, action):
         }
     :rtype: dict
     """
-    stdout = PIPE if action == "plan" else None
-    stderr = PIPE if action == "plan" else None
+    with TemporaryFile() as stdout_file:
+        stdout = stdout_file if action == "plan" else None
 
-    returncode, cout, cerr = execute(
-        ["make", "-C", path, action], stdout=stdout, stderr=stderr
-    )
-    status = {"success": returncode == 0, "stderr": cerr, "stdout": cout}
-    if cout is None:
-        cout = b""
-    parse_tree = parse_plan(cout.decode("utf-8"))
-    status["add"] = parse_tree[0]
-    status["change"] = parse_tree[1]
-    status["destroy"] = parse_tree[2]
+        returncode, _, _ = execute(
+            ["make", "-C", path, action], stdout=stdout, stderr=None
+        )
+        status = {
+            "success": returncode == 0,
+            "stderr": "",
+        }
 
-    return status
+        if stdout is None:
+            status["stdout"] = b""
+        else:
+            stdout.seek(0)
+            status["stdout"] = stdout.read()
+
+        parse_tree = parse_plan(status["stdout"].decode("utf-8"))
+        status["add"] = parse_tree[0]
+        status["change"] = parse_tree[1]
+        status["destroy"] = parse_tree[2]
+
+        return status
 
 
 def execute(
@@ -694,8 +702,8 @@ def _decode_str_in_dict(in_dict, encoding="utf-8"):
     """
     Decode all binary string values in a dictionary.
 
-    :param value: Input dictionary
-    :type value: dict
+    :param in_dict: Input dictionary
+    :type in_dict: dict
     :param encoding: Encoding to use. By default, 'utf-8'.
     :type encoding: str
     :return: Dictionary with all binary strings converted to encoded strings.
