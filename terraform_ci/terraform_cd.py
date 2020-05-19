@@ -1,6 +1,6 @@
 """terraform-cd deploys artifacts to S3."""
 import sys
-from os import environ, path as osp
+from os import getcwd, symlink, environ, path as osp
 from subprocess import Popen
 from tempfile import TemporaryDirectory
 
@@ -24,9 +24,41 @@ def get_default_module_name():
         return osp.basename(osp.abspath(osp.curdir))
 
 
+def send_to_s3(bucket, local_file, target_file):
+    try:
+        s3_client = boto3.client("s3")
+
+        with open(local_file, "rb") as archive_descriptor:
+            s3_client.upload_fileobj(
+                archive_descriptor,
+                bucket,
+                target_file,
+                ExtraArgs={"ACL": "bucket-owner-full-control"},
+            )
+            LOG.info(
+                "Published artifact to s3://%s/%s",
+                bucket,
+                target_file,
+            )
+
+    except ClientError as err:
+        LOG.error(err)
+        try:
+            sts_client = boto3.client("sts")
+            LOG.error("AWS caller: %s", sts_client.get_caller_identity()["Arn"])
+
+        except ClientError:
+            LOG.warning(
+                "Failed to get AWS caller. Probably the client is not authenticated."
+            )
+
+        sys.exit(1)
+
+
 @click.command()
 @click.version_option()
 @click.option("--debug", help="Print debug messages", is_flag=True, default=False)
+@click.option("--include-artifacts", help="Include the CI/CD build instead of making a git archive.", is_flag=True, default=False)
 @click.option(
     "--module-version",
     help="Module version to use. It is supposed to be a git tag "
@@ -68,49 +100,54 @@ def terraform_cd(**kwargs):
     setup_logging(LOG, debug=kwargs["debug"])
 
     with TemporaryDirectory() as tmp_dir:
+        release_archive_full_path = osp.join(tmp_dir, release_archive)
+        module_directory_name = "{project}-{tag}".format(project=module_name, tag=tag)
 
-        with open(osp.join(tmp_dir, release_archive), "wb") as archive_descriptor:
+        # generate archive using CI/CDs working directory
+        if kwargs["include_artifacts"]:
+            LOG.debug("Storing archive under {archive}".format(archive=release_archive_full_path))
+            symlink(getcwd(), osp.join(tmp_dir, module_directory_name))
+
             proc = Popen(
                 [
-                    "git",
-                    "archive",
-                    "--format=tar.gz",
-                    "--prefix={project}-{tag}/".format(project=module_name, tag=tag),
-                    tag,
-                ],
-                stdout=archive_descriptor,
+                    "tar",
+                    "--directory={tmp}".format(tmp=tmp_dir),
+                    "-chzf",
+                    release_archive_full_path,
+                    module_directory_name
+                ]
             )
-        proc.communicate()
+            LOG.debug("Running {cmd}".format(cmd=proc.args))
+            proc.communicate()
 
+        # generate archive using git archive
+        else:
+            with open(release_archive_full_path, "wb") as archive_descriptor:
+                proc = Popen(
+                    [
+                        "git",
+                        "archive",
+                        "--format=tar.gz",
+                        "--prefix={project}-{tag}/".format(project=module_name, tag=tag),
+                        tag,
+                    ],
+                    stdout=archive_descriptor,
+                )
+            LOG.debug("Running {cmd}".format(cmd=proc.args))
+            proc.communicate()
+
+
+        # sync tar.gz to s3
         setup_environment(
             config_path=kwargs["env_file"], role=kwargs["aws_assume_role_arn"]
         )
 
-        try:
-            s3_client = boto3.client("s3")
+        send_to_s3(
+            bucket=bucket,
+            local_file=release_archive_full_path,
+            target_file=osp.join(module_name, release_archive)
+        )
 
-            with open(osp.join(tmp_dir, release_archive), "rb") as archive_descriptor:
-                s3_client.upload_fileobj(
-                    archive_descriptor,
-                    bucket,
-                    osp.join(module_name, release_archive),
-                    ExtraArgs={"ACL": "bucket-owner-full-control"},
-                )
-                LOG.info(
-                    "Published artifact to s3://%s/%s",
-                    bucket,
-                    osp.join(module_name, release_archive),
-                )
 
-        except ClientError as err:
-            LOG.error(err)
-            try:
-                sts_client = boto3.client("sts")
-                LOG.error("AWS caller: %s", sts_client.get_caller_identity()["Arn"])
-
-            except ClientError:
-                LOG.warning(
-                    "Failed to get AWS caller. Probably the client is not authenticated."
-                )
-
-            sys.exit(1)
+if __name__ == '__main__':
+    terraform_cd()
