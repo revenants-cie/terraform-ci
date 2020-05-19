@@ -25,6 +25,16 @@ def get_default_module_name():
 
 
 def send_to_s3(bucket, local_file, target_file):
+    """
+    Send archive file to the s3 bucket
+    :param bucket: s3 bucket name
+    :type bucket: str
+    :param local_file: local archive file name
+    :type local_file: str
+    :param target_file: target file name
+    :type target_file: str
+    :return:
+    """
     try:
         s3_client = boto3.client("s3")
 
