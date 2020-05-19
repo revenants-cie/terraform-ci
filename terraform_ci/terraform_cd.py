@@ -36,9 +36,7 @@ def send_to_s3(bucket, local_file, target_file):
                 ExtraArgs={"ACL": "bucket-owner-full-control"},
             )
             LOG.info(
-                "Published artifact to s3://%s/%s",
-                bucket,
-                target_file,
+                "Published artifact to s3://%s/%s", bucket, target_file,
             )
 
     except ClientError as err:
@@ -58,7 +56,12 @@ def send_to_s3(bucket, local_file, target_file):
 @click.command()
 @click.version_option()
 @click.option("--debug", help="Print debug messages", is_flag=True, default=False)
-@click.option("--include-artifacts", help="Include the CI/CD build instead of making a git archive.", is_flag=True, default=False)
+@click.option(
+    "--include-artifacts",
+    help="Include the CI/CD build instead of making a git archive.",
+    is_flag=True,
+    default=False,
+)
 @click.option(
     "--module-version",
     help="Module version to use. It is supposed to be a git tag "
@@ -105,7 +108,11 @@ def terraform_cd(**kwargs):
 
         # generate archive using CI/CDs working directory
         if kwargs["include_artifacts"]:
-            LOG.debug("Storing archive under {archive}".format(archive=release_archive_full_path))
+            LOG.debug(
+                "Storing archive under {archive}".format(
+                    archive=release_archive_full_path
+                )
+            )
             symlink(getcwd(), osp.join(tmp_dir, module_directory_name))
 
             proc = Popen(
@@ -114,7 +121,7 @@ def terraform_cd(**kwargs):
                     "--directory={tmp}".format(tmp=tmp_dir),
                     "-chzf",
                     release_archive_full_path,
-                    module_directory_name
+                    module_directory_name,
                 ]
             )
             LOG.debug("Running {cmd}".format(cmd=proc.args))
@@ -128,14 +135,15 @@ def terraform_cd(**kwargs):
                         "git",
                         "archive",
                         "--format=tar.gz",
-                        "--prefix={project}-{tag}/".format(project=module_name, tag=tag),
+                        "--prefix={project}-{tag}/".format(
+                            project=module_name, tag=tag
+                        ),
                         tag,
                     ],
                     stdout=archive_descriptor,
                 )
             LOG.debug("Running {cmd}".format(cmd=proc.args))
             proc.communicate()
-
 
         # sync tar.gz to s3
         setup_environment(
@@ -145,9 +153,9 @@ def terraform_cd(**kwargs):
         send_to_s3(
             bucket=bucket,
             local_file=release_archive_full_path,
-            target_file=osp.join(module_name, release_archive)
+            target_file=osp.join(module_name, release_archive),
         )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     terraform_cd()
