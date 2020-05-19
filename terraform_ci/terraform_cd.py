@@ -118,11 +118,7 @@ def terraform_cd(**kwargs):
 
         # generate archive using CI/CDs working directory
         if kwargs["include_artifacts"]:
-            LOG.debug(
-                "Storing archive under {archive}".format(
-                    archive=release_archive_full_path
-                )
-            )
+            LOG.debug("Storing archive under %s", release_archive_full_path)
             symlink(getcwd(), osp.join(tmp_dir, module_directory_name))
 
             proc = Popen(
@@ -134,7 +130,7 @@ def terraform_cd(**kwargs):
                     module_directory_name,
                 ]
             )
-            LOG.debug("Running {cmd}".format(cmd=proc.args))
+            LOG.debug("Running %s", proc.args)
             proc.communicate()
 
         # generate archive using git archive
@@ -152,7 +148,7 @@ def terraform_cd(**kwargs):
                     ],
                     stdout=archive_descriptor,
                 )
-            LOG.debug("Running {cmd}".format(cmd=proc.args))
+            LOG.debug("Running %s", proc.args)
             proc.communicate()
 
         # sync tar.gz to s3
