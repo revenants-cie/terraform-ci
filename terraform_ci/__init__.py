@@ -224,7 +224,7 @@ def render_comment(status):
             except TypeError:
                 changes[change] = "Unknown"
 
-        line = "**{module}** | {tag} `{success}` " "| {add} | {change} | {destroy}"
+        line = "**{module}** | {tag} `{success}` | {add} | {change} | {destroy}"
         line = line.format(
             module=key,
             tag=tag_map[status[key]["success"]],
