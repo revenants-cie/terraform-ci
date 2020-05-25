@@ -163,7 +163,3 @@ def terraform_cd(**kwargs):
             local_file=release_archive_full_path,
             target_file=osp.join(module_name, release_archive),
         )
-
-
-if __name__ == "__main__":
-    terraform_cd()
