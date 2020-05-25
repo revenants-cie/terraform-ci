@@ -2,7 +2,6 @@
 from textwrap import dedent
 from setuptools import setup, find_packages
 
-
 def parse_requirements(req_file):
     """
     Parse file with requirements and return a dictionary

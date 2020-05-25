@@ -6,16 +6,7 @@ import pytest
 from terraform_ci import module_name_from_path
 
 
-@pytest.mark.parametrize('path, module_name', [
-    (
-        '/foo/bar/',
-        'bar'
-    ),
-    (
-        '/',
-        'root'
-    )
-])
+@pytest.mark.parametrize("path, module_name", [("/foo/bar/", "bar"), ("/", "root")])
 def test_module_name_from_path(path, module_name):
     """
     Get module name from path.
@@ -31,5 +22,5 @@ def test_module_name_from_path_from_cur_dir(tmpdir):
     """
     Get module name from current directory
     """
-    path = tmpdir.mkdir('foo')
-    assert module_name_from_path(path) == 'foo'
+    path = tmpdir.mkdir("foo")
+    assert module_name_from_path(path) == "foo"

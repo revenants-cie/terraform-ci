@@ -1,0 +1,70 @@
+"""Tests for terraform_cd()."""
+import os
+from pathlib import Path
+from subprocess import run
+
+from click.testing import CliRunner
+from terraform_ci.terraform_cd import terraform_cd
+
+
+def test_terraform_cd_outputs():
+    """
+    Test if --include-artifacts generates the same structure as git archive
+    """
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        for directory in ["local", "git", "test"]:
+            os.mkdir(directory)
+
+        os.chdir("test")
+
+        for f_name in range(10):
+            Path(f"{f_name}.py").touch()
+
+        run("git init", shell=True, check=True)
+        run("git add .", shell=True, check=True)
+        run("ls -al", shell=True, check=True)
+        run("git commit -a -m test1", shell=True, check=True)
+        run("git tag 0.1.1", shell=True, check=True)
+
+        result = runner.invoke(
+            terraform_cd,
+            [
+                "--debug",
+                "--include-artifacts",
+                "--module-name=test",
+                "--module-version=0.1.1",
+                "--target=local",
+                "../local/",
+            ],
+        )
+        assert result.exit_code == 0
+
+        result = runner.invoke(
+            terraform_cd,
+            [
+                "--debug",
+                "--module-name=test",
+                "--module-version=0.1.1",
+                "--target=local",
+                "../git/",
+            ],
+        )
+        assert result.exit_code == 0
+
+        os.chdir("..")
+        # run("ls -alR", shell=True, check=True)
+        git_out = run(
+            "tar -tf ./git/test-0.1.1.tar.gz | sort",
+            shell=True,
+            check=True,
+            capture_output=True,
+        )
+        local_out = run(
+            "tar -tf ./local/test-0.1.1.tar.gz | sort",
+            shell=True,
+            check=True,
+            capture_output=True,
+        )
+        print(git_out.stdout, local_out.stdout)
+        assert git_out.stdout == local_out.stdout

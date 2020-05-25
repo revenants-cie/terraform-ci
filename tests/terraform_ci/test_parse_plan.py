@@ -6,18 +6,14 @@ import pytest
 from terraform_ci import parse_plan
 
 
-@pytest.mark.parametrize('output, result', [
-    (
-        "",
-        (None, None, None)
-    ),
-    (
-        None,
-        (None, None, None)
-    ),
-    (
-        dedent(
-            """
+@pytest.mark.parametrize(
+    "output, result",
+    [
+        ("", (None, None, None)),
+        (None, (None, None, None)),
+        (
+            dedent(
+                """
             github_repository_webhook.slack: Refreshing state... (ID: 103656263)
 
             ------------------------------------------------------------------------
@@ -41,12 +37,12 @@ from terraform_ci import parse_plan
             can't guarantee that exactly these actions will be performed if
             "terraform apply" is subsequently run.
             """
+            ),
+            (4, 11, 7),
         ),
-        (4, 11, 7)
-    ),
-    (
-        dedent(
-            """
+        (
+            dedent(
+                """
             Refreshing Terraform state in-memory prior to plan...
             The refreshed state will be used to calculate this plan, but will not be
             persisted to local or remote state storage.
@@ -62,10 +58,11 @@ from terraform_ci import parse_plan
             configuration and real physical resources that exist. As a result, no
             actions need to be performed.
             """
+            ),
+            (0, 0, 0),
         ),
-        (0, 0, 0)
-    )
-])
+    ],
+)
 def test_parse_plan(output, result):
     """
     parse_plan() returns valid result.

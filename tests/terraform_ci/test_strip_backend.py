@@ -10,6 +10,4 @@ def test_strip_backend(tmpdir):
     tf_file.write("")
 
     with strip_backend(str(original_tf_dir)) as tmp_tf_dir:
-        assert osp.exists(
-            osp.join(tmp_tf_dir, "main.tf")
-        )
+        assert osp.exists(osp.join(tmp_tf_dir, "main.tf"))
