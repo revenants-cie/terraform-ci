@@ -1,7 +1,7 @@
 """Tests for terraform_cd()."""
 import os
 from pathlib import Path
-from subprocess import run
+from subprocess import run, PIPE
 
 from click.testing import CliRunner
 from terraform_ci.terraform_cd import terraform_cd
@@ -23,7 +23,6 @@ def test_terraform_cd_outputs():
 
         run("git init", shell=True, check=True)
         run("git add .", shell=True, check=True)
-        run("ls -al", shell=True, check=True)
         run("git commit -a -m test1", shell=True, check=True)
         run("git tag 0.1.1", shell=True, check=True)
 
@@ -53,18 +52,18 @@ def test_terraform_cd_outputs():
         assert result.exit_code == 0
 
         os.chdir("..")
-        # run("ls -alR", shell=True, check=True)
+
         git_out = run(
             "tar -tf ./git/test-0.1.1.tar.gz | sort",
             shell=True,
             check=True,
-            capture_output=True,
+            stdout=PIPE
         )
         local_out = run(
             "tar -tf ./local/test-0.1.1.tar.gz | sort",
             shell=True,
             check=True,
-            capture_output=True,
+            stdout=PIPE,
         )
-        print(git_out.stdout, local_out.stdout)
+        assert len(git_out.stdout) > 0
         assert git_out.stdout == local_out.stdout

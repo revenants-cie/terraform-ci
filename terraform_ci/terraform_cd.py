@@ -33,7 +33,6 @@ def send_to_s3(bucket, local_file, target_file):
     :type local_file: str
     :param target_file: target file name
     :type target_file: str
-    :return:
     """
     try:
         s3_client = boto3.client("s3")
