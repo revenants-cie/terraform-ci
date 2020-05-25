@@ -2,7 +2,6 @@
 from textwrap import dedent
 from setuptools import setup, find_packages
 
-
 def parse_requirements(req_file):
     """
     Parse file with requirements and return a dictionary
@@ -25,7 +24,7 @@ SETUP_REQUIREMENTS = parse_requirements("requirements/requirements_setup.txt")
 if __name__ == "__main__":
     setup(
         name="terraform-ci",
-        version="1.2.2",
+        version="1.3.0",
         description="Terraform CI runs terraform in Travis-CI",
         long_description=dedent(
             """

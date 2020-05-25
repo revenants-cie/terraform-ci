@@ -8,6 +8,6 @@ def test_get(config_file_path):
     """
     parser = SectionLessConfigParser()
     parser.read(config_file_path)
-    assert parser.get('foo') == 'bar'
-    assert parser.get('xyz') == 'abc'
-    assert parser.get('aaa') == 'bbb'
+    assert parser.get("foo") == "bar"
+    assert parser.get("xyz") == "abc"
+    assert parser.get("aaa") == "bbb"

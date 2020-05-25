@@ -19,7 +19,7 @@ import boto3
 import hcl
 from github import Github
 
-__version__ = "1.2.2"
+__version__ = "1.3.0"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 DEFAULT_PROGRESS_INTERVAL = 10
@@ -224,7 +224,7 @@ def render_comment(status):
             except TypeError:
                 changes[change] = "Unknown"
 
-        line = "**{module}** | {tag} `{success}` " "| {add} | {change} | {destroy}"
+        line = "**{module}** | {tag} `{success}` | {add} | {change} | {destroy}"
         line = line.format(
             module=key,
             tag=tag_map[status[key]["success"]],

@@ -1,13 +1,13 @@
 """terraform-cd deploys artifacts to S3."""
 import sys
-from os import environ, path as osp
+from os import getcwd, symlink, environ, path as osp
+from shutil import copy
 from subprocess import Popen
 from tempfile import TemporaryDirectory
 
 import boto3
 import click
 from botocore.exceptions import ClientError
-
 from terraform_ci import DEFAULT_TERRAFORM_VARS, setup_environment, LOG, setup_logging
 
 
@@ -24,9 +24,56 @@ def get_default_module_name():
         return osp.basename(osp.abspath(osp.curdir))
 
 
+def send_to_s3(bucket, local_file, target_file):
+    """
+    Send archive file to the s3 bucket
+    :param bucket: s3 bucket name
+    :type bucket: str
+    :param local_file: local archive file name
+    :type local_file: str
+    :param target_file: target file name
+    :type target_file: str
+    """
+    try:
+        s3_client = boto3.client("s3")
+
+        with open(local_file, "rb") as archive_descriptor:
+            s3_client.upload_fileobj(
+                archive_descriptor,
+                bucket,
+                target_file,
+                ExtraArgs={"ACL": "bucket-owner-full-control"},
+            )
+            LOG.info(
+                "Published artifact to s3://%s/%s", bucket, target_file,
+            )
+
+    except ClientError as err:
+        LOG.error(err)
+        try:
+            sts_client = boto3.client("sts")
+            LOG.error("AWS caller: %s", sts_client.get_caller_identity()["Arn"])
+
+        except ClientError:
+            LOG.warning(
+                "Failed to get AWS caller. Probably the client is not authenticated."
+            )
+
+        sys.exit(1)
+
+
 @click.command()
 @click.version_option()
 @click.option("--debug", help="Print debug messages", is_flag=True, default=False)
+@click.option(
+    "--include-artifacts",
+    help="Include the CI/CD build instead of making a git archive.",
+    is_flag=True,
+    default=False,
+)
+@click.option(
+    "--target", help="Output target method (s3 or local)", default="s3",
+)
 @click.option(
     "--module-version",
     help="Module version to use. It is supposed to be a git tag "
@@ -56,7 +103,7 @@ def get_default_module_name():
     show_default=False,
     required=False,
 )
-@click.argument("bucket")
+@click.argument("target_location")
 def terraform_cd(**kwargs):
     """
     Publish Terraform module in S3 bucket.
@@ -64,53 +111,62 @@ def terraform_cd(**kwargs):
     module_name = kwargs["module_name"]
     tag = kwargs["module_version"]
     release_archive = "{project}-{tag}.tar.gz".format(project=module_name, tag=tag)
-    bucket = kwargs["bucket"]
+    target_location = kwargs["target_location"]
     setup_logging(LOG, debug=kwargs["debug"])
 
     with TemporaryDirectory() as tmp_dir:
+        release_archive_full_path = osp.join(tmp_dir, release_archive)
+        module_directory_name = "{project}-{tag}".format(project=module_name, tag=tag)
 
-        with open(osp.join(tmp_dir, release_archive), "wb") as archive_descriptor:
+        # generate archive using CI/CDs working directory
+        if kwargs["include_artifacts"]:
+            LOG.debug("Storing archive under %s", release_archive_full_path)
+            symlink(getcwd(), osp.join(tmp_dir, module_directory_name))
+
             proc = Popen(
                 [
-                    "git",
-                    "archive",
-                    "--format=tar.gz",
-                    "--prefix={project}-{tag}/".format(project=module_name, tag=tag),
-                    tag,
-                ],
-                stdout=archive_descriptor,
+                    "tar",
+                    "--directory={tmp}".format(tmp=tmp_dir),
+                    "--exclude-vcs",
+                    "--exclude-vcs-ignores",
+                    "--owner=0",
+                    "--group=0",
+                    "-chzf",
+                    release_archive_full_path,
+                    module_directory_name,
+                ]
             )
-        proc.communicate()
+            LOG.debug("Running %s", proc.args)
+            proc.communicate()
 
-        setup_environment(
-            config_path=kwargs["env_file"], role=kwargs["aws_assume_role_arn"]
-        )
-
-        try:
-            s3_client = boto3.client("s3")
-
-            with open(osp.join(tmp_dir, release_archive), "rb") as archive_descriptor:
-                s3_client.upload_fileobj(
-                    archive_descriptor,
-                    bucket,
-                    osp.join(module_name, release_archive),
-                    ExtraArgs={"ACL": "bucket-owner-full-control"},
+        # generate archive using git archive
+        else:
+            with open(release_archive_full_path, "wb") as archive_descriptor:
+                proc = Popen(
+                    [
+                        "git",
+                        "archive",
+                        "--format=tar.gz",
+                        "--prefix={project}-{tag}/".format(
+                            project=module_name, tag=tag
+                        ),
+                        tag,
+                    ],
+                    stdout=archive_descriptor,
                 )
-                LOG.info(
-                    "Published artifact to s3://%s/%s",
-                    bucket,
-                    osp.join(module_name, release_archive),
-                )
+            LOG.debug("Running %s", proc.args)
+            proc.communicate()
 
-        except ClientError as err:
-            LOG.error(err)
-            try:
-                sts_client = boto3.client("sts")
-                LOG.error("AWS caller: %s", sts_client.get_caller_identity()["Arn"])
+        if kwargs["target"] == "s3":
+            # sync tar.gz to s3
+            setup_environment(
+                config_path=kwargs["env_file"], role=kwargs["aws_assume_role_arn"]
+            )
 
-            except ClientError:
-                LOG.warning(
-                    "Failed to get AWS caller. Probably the client is not authenticated."
-                )
-
-            sys.exit(1)
+            send_to_s3(
+                bucket=target_location,
+                local_file=release_archive_full_path,
+                target_file=osp.join(module_name, release_archive),
+            )
+        elif kwargs["target"] == "local":
+            copy(release_archive_full_path, target_location)
