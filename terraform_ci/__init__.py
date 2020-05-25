@@ -19,7 +19,7 @@ import boto3
 import hcl
 from github import Github
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 DEFAULT_TERRAFORM_VARS = ".env/tf_env.json"
 DEFAULT_PROGRESS_INTERVAL = 10
