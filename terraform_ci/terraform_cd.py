@@ -125,6 +125,8 @@ def terraform_cd(**kwargs):
                 [
                     "tar",
                     "--directory={tmp}".format(tmp=tmp_dir),
+                    "--exclude-vcs",
+                    "--exclude-vcs-ignores",
                     "-chzf",
                     release_archive_full_path,
                     module_directory_name,
